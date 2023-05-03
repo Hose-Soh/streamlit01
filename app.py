@@ -416,6 +416,9 @@ pr = (
     ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
     .select("precipitation")
     .filterDate(i_date, f_date)
+    .reduceRegion(reducer=ee.Reducer.mean(), geometry=poi, scale=1000)
+    .get("precipitation")
+    .getInfo()
 )
 
 # Import potential evaporation PET and its quality indicator ET_QC.
@@ -426,7 +429,7 @@ pet = (
 )
 
 # Evaluate local precipitation conditions.
-local_pr = pr.getRegion(poi, scale)
+local_pr = pr
 pprint.pprint(local_pr)
 
 
