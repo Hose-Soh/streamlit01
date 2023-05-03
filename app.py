@@ -147,8 +147,8 @@ vis_params = {
 my_map.addLayer(sand, vis_params, "Sand Content")
 
 # Add a marker at the location of interest.
-marker = geemap.Marker(location=[lat, lon], draggable=False)
-my_map.add_layer(marker)
+#marker = geemap.Marker(location=[lat, lon], draggable=False)
+#my_map.add_layer(marker)
 
 # Add a layer control panel to the map.
 my_map.addLayerControl()
