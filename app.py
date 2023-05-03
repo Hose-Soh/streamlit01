@@ -5,7 +5,6 @@ import ee
 import geemap.colormaps as cm
 import geemap.foliumap as geemap
 import streamlit as st
-import pydeck as pdk
 
 # ______ GEE Authenthication ______
 
@@ -132,15 +131,11 @@ def add_ee_layer(self, ee_image_object, vis_params, name):
     ).add_to(self)
 
 
-# Add Earth Engine drawing method to folium.
-folium.Map.add_ee_layer = add_ee_layer
-
-# Create a folium map centered on the location of interest
-my_map = folium.Map(location=[lat, lon], zoom_start=3)
+# Create a GEE map centered on the location of interest
+my_map = geemap.Map(center=[lat, lon], zoom=3)
 
 # Set visualization parameters.
 vis_params = {
-    "bands": ["b0"],
     "min": 0.01,
     "max": 1,
     "opacity": 1,
@@ -148,44 +143,17 @@ vis_params = {
 }
 
 # Add the sand content data to the map object.
-my_map.add_ee_layer(sand, vis_params, "Sand Content")
+my_map.addLayer(sand, vis_params, "Sand Content")
 
 # Add a marker at the location of interest.
-folium.Marker([lat, lon], popup="point of interest").add_to(my_map)
+marker = geemap.Marker(location=[lat, lon], draggable=False)
+my_map.add_layer(marker)
 
 # Add a layer control panel to the map.
-my_map.add_child(folium.LayerControl())
+my_map.addLayerControl()
 
 # Display the map.
-# Use streamlit's pydeck_chart to display the Folium map
-st.pydeck_chart(pdk.Deck(
-    map_style="mapbox://styles/mapbox/light-v9",
-    initial_view_state=pdk.ViewState(
-        latitude=lat,
-        longitude=lon,
-        zoom=11,
-        pitch=50,
-    ),
-    layers=[
-        pdk.Layer(
-            "HexagonLayer",
-            data=my_map,
-            get_position=["lon", "lat"],
-            radius=100,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            pickable=True,
-            extruded=True,
-        ),
-        pdk.Layer(
-            "ScatterplotLayer",
-            data=my_map,
-            get_position=["lon", "lat"],
-            get_color=[200, 30, 0, 160],
-            get_radius=200,
-        ),
-    ],
-))
+my_map.to_streamlit(height=600,  responsive=True, scrolling=False)
 
 
 def local_profile(dataset, poi, buffer):
