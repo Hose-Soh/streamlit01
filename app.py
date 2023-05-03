@@ -427,7 +427,7 @@ pet = (
 
 # Evaluate local precipitation conditions.
 local_pr = pr.getRegion(poi, scale)
-pprint.pprint(local_pr[:5])
+##pprint.pprint(local_pr[:5])
 
 # def ee_array_to_df(arr, list_of_bands):
 #     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
