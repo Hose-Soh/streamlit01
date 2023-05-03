@@ -156,7 +156,7 @@ folium.Marker([lat, lon], popup="point of interest").add_to(my_map)
 my_map.add_child(folium.LayerControl())
 
 # Display the map.
-st.write(my_map._repr_html_(), unsafe_allow_html=True)
+Mmy_map.to_streamlit(height=600,  responsive=True, scrolling=False)
 
 
 def local_profile(dataset, poi, buffer):
