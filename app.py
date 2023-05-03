@@ -411,20 +411,6 @@ st.pyplot(fig)
 
 #_____________________________________________Getting Meteorological Datasets_____________________________________________
 
-# Import precipitation.
-pr = (
-    ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
-    .select("precipitation")
-    .filterDate(i_date, f_date)
-    .first()  # get the first image in the collection
-)
-
-local_pr = pr.reduceRegion(
-    reducer=ee.Reducer.toList(),
-    geometry=poi,
-    scale=scale
-).get("precipitation").getInfo()
-
 # Import potential evaporation PET and its quality indicator ET_QC.
 pet = (
     ee.ImageCollection("MODIS/006/MOD16A2")
@@ -432,36 +418,19 @@ pet = (
     .filterDate(i_date, f_date)
 )
 
+# Get the precipitation data for the point of interest and date range
+pr = (
+    ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
+    .filterDate(i_date, f_date)
+    .select('precipitation')
+    .filterBounds(poi)
+)
 
+# Reduce the data to a single point using mean
+pr_point = pr.reduce(ee.Reducer.mean()).getInfo()
 
-
-
-def ee_array_to_df(arr, list_of_bands):
-    """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    df = pd.DataFrame(arr)
-
-    # Rearrange the header.
-    headers = df.iloc[0]
-    df = pd.DataFrame(df.values[1:], columns=headers)
-
-    # Convert the data to numeric values.
-    for band in list_of_bands:
-        df[band] = pd.to_numeric(df[band], errors="coerce")
-
-    # Convert the time field into a datetime.
-    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
-
-    # Keep the columns of interest.
-    df = df[["time", "datetime", *list_of_bands]]
-
-    # The datetime column is defined as index.
-    df = df.set_index("datetime")
-
-    return df
-
-pr_df = ee_array_to_df(local_pr, ["precipitation"])
-#pr_df.head(10)
-
+# Convert the data to a pandas dataframe
+pr_df = pd.DataFrame([pr_point['precipitation']], columns=['precipitation'])
 
 
 
