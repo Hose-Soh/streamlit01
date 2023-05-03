@@ -432,6 +432,7 @@ pprint.pprint(local_pr)
 
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
+    arr = list(arr)
     df = pd.DataFrame(arr[1:], columns=arr[0])
 
     
