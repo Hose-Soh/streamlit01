@@ -62,7 +62,7 @@ default_i_date = datetime(2015, 1, 1)
 default_f_date = datetime(2020, 1, 1)
 
 # Create date inputs with default values
-i_date = st.date_input("Initial date of interest (inclusive)", value=date.strftime(default_i_date), min_value=date.strftime(datetime(1992, 1, 1)), max_value=date.strftime(datetime.now()))
+i_date = st.date_input("Initial date of interest (inclusive)", value=default_i_date, min_value=datetime(1992, 1, 1), max_value=datetime.now())
 f_date = st.date_input("Final date of interest (exclusive)", value=default_f_date, min_value=datetime(1992, 1, 1), max_value=datetime.now())
 
 # Take input from user for lon and lat
