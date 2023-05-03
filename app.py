@@ -409,394 +409,394 @@ ax.legend(
 st.pyplot(fig)
 
 
-#_____________________________________________Getting Meteorological Datasets_____________________________________________
+# #_____________________________________________Getting Meteorological Datasets_____________________________________________
 
-import ee
-import pandas as pd
+# import ee
+# import pandas as pd
 
-def ee_array_to_df(arr, list_of_bands):
-    """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    df = pd.DataFrame(arr)
+# def ee_array_to_df(arr, list_of_bands):
+#     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
+#     df = pd.DataFrame(arr)
 
-    # Rearrange the header.
-    headers = df.iloc[0]
-    df = pd.DataFrame(df.values[1:], columns=headers)
+#     # Rearrange the header.
+#     headers = df.iloc[0]
+#     df = pd.DataFrame(df.values[1:], columns=headers)
 
-    # Convert the data to numeric values.
-    for band in list_of_bands:
-        df[band] = pd.to_numeric(df[band], errors="coerce")
+#     # Convert the data to numeric values.
+#     for band in list_of_bands:
+#         df[band] = pd.to_numeric(df[band], errors="coerce")
 
-    # Convert the time field into a datetime.
-    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
+#     # Convert the time field into a datetime.
+#     df["datetime"] = pd.to_datetime(df["time"], unit="ms")
 
-    # Keep the columns of interest.
-    df = df[["time", "datetime", *list_of_bands]]
+#     # Keep the columns of interest.
+#     df = df[["time", "datetime", *list_of_bands]]
 
-    # The datetime column is defined as index.
-    df = df.set_index("datetime")
+#     # The datetime column is defined as index.
+#     df = df.set_index("datetime")
 
-    return df
+#     return df
 
-def evaluate_local_pr(poi, i_date, f_date, scale):
-    pr = (
-        ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
-        .select("precipitation")
-        .filterDate(i_date, f_date)
-    )
+# def evaluate_local_pr(poi, i_date, f_date, scale):
+#     pr = (
+#         ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
+#         .select("precipitation")
+#         .filterDate(i_date, f_date)
+#     )
 
-    # Evaluate local precipitation conditions.
-    local_pr = pr.getRegion(poi, scale)
+#     # Evaluate local precipitation conditions.
+#     local_pr = pr.getRegion(poi, scale)
 
-    # Transform the result into a pandas dataframe.
-    pr_df = ee_array_to_df(local_pr, ["precipitation"])
-    return pr_df
+#     # Transform the result into a pandas dataframe.
+#     pr_df = ee_array_to_df(local_pr, ["precipitation"])
+#     return pr_df
 
-def evaluate_local_pet(poi, scale):
-    pet = ee.ImageCollection("IDAHO_EPSCOR/TERRACLIMATE").select("pet")
+# def evaluate_local_pet(poi, scale):
+#     pet = ee.ImageCollection("IDAHO_EPSCOR/TERRACLIMATE").select("pet")
     
-    # Evaluate local potential evapotranspiration.
-    local_pet = pet.getRegion(poi, scale).getInfo()
+#     # Evaluate local potential evapotranspiration.
+#     local_pet = pet.getRegion(poi, scale).getInfo()
 
-    # Transform the result into a pandas dataframe.
-    pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
-    return pet_df
+#     # Transform the result into a pandas dataframe.
+#     pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
+#     return pet_df
 
 
-def sum_resampler(coll, freq, unit, scale_factor, band_name):
-    """
-    This function aims to resample the time scale of an ee.ImageCollection.
-    The function returns an ee.ImageCollection with the averaged sum of the
-    band on the selected frequency.
+# def sum_resampler(coll, freq, unit, scale_factor, band_name):
+#     """
+#     This function aims to resample the time scale of an ee.ImageCollection.
+#     The function returns an ee.ImageCollection with the averaged sum of the
+#     band on the selected frequency.
 
-    coll: (ee.ImageCollection) only one band can be handled
-    freq: (int) corresponds to the resampling frequence
-    unit: (str) corresponds to the resampling time unit.
-                must be 'day', 'month' or 'year'
-    scale_factor (float): scaling factor used to get our value in the good unit
-    band_name (str) name of the output band
-    """
+#     coll: (ee.ImageCollection) only one band can be handled
+#     freq: (int) corresponds to the resampling frequence
+#     unit: (str) corresponds to the resampling time unit.
+#                 must be 'day', 'month' or 'year'
+#     scale_factor (float): scaling factor used to get our value in the good unit
+#     band_name (str) name of the output band
+#     """
 
-    # Define initial and final dates of the collection.
-    firstdate = ee.Date(
-        coll.sort("system:time_start", True).first().get("system:time_start")
-    )
+#     # Define initial and final dates of the collection.
+#     firstdate = ee.Date(
+#         coll.sort("system:time_start", True).first().get("system:time_start")
+#     )
 
-    lastdate = ee.Date(
-        coll.sort("system:time_start", False).first().get("system:time_start")
-    )
+#     lastdate = ee.Date(
+#         coll.sort("system:time_start", False).first().get("system:time_start")
+#     )
 
-    # Calculate the time difference between both dates.
-    # https://developers.google.com/earth-engine/apidocs/ee-date-difference
-    diff_dates = lastdate.difference(firstdate, unit)
+#     # Calculate the time difference between both dates.
+#     # https://developers.google.com/earth-engine/apidocs/ee-date-difference
+#     diff_dates = lastdate.difference(firstdate, unit)
 
-    # Define a new time index (for output).
-    new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
+#     # Define a new time index (for output).
+#     new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
 
-    # Define the function that will be applied to our new time index.
-    def apply_resampling(date_index):
-        # Define the starting date to take into account.
-        startdate = firstdate.advance(ee.Number(date_index), unit)
+#     # Define the function that will be applied to our new time index.
+#     def apply_resampling(date_index):
+#         # Define the starting date to take into account.
+#         startdate = firstdate.advance(ee.Number(date_index), unit)
 
-        # Define the ending date to take into account according
-        # to the desired frequency.
-        enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
-
-        # Calculate the number of days between starting and ending days.
-        diff_days = enddate.difference(startdate, "day")
-
-        # Calculate the composite image.
-        image = (
-            coll.filterDate(startdate, enddate)
-            .mean()
-            .multiply(diff_days)
-            .multiply(scale_factor)
-            .rename(band_name)
-        )
+#         # Define the ending date to take into account according
+#         # to the desired frequency.
+#         enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
+
+#         # Calculate the number of days between starting and ending days.
+#         diff_days = enddate.difference(startdate, "day")
+
+#         # Calculate the composite image.
+#         image = (
+#             coll.filterDate(startdate, enddate)
+#             .mean()
+#             .multiply(diff_days)
+#             .multiply(scale_factor)
+#             .rename(band_name)
+#         )
 
-        # Return the final image with the appropriate time index.
-        return image.set("system:time_start", startdate.millis())
+#         # Return the final image with the appropriate time index.
+#         return image.set("system:time_start", startdate.millis())
 
-    # Map the function to the new time index.
-    res = new_index.map(apply_resampling)
+#     # Map the function to the new time index.
+#     res = new_index.map(apply_resampling)
 
-    # Transform the result into an ee.ImageCollection.
-    res = ee.ImageCollection(res)
+#     # Transform the result into an ee.ImageCollection.
+#     res = ee.ImageCollection(res)
 
-    return res
+#     return res
 
-# Apply the resampling function to the precipitation dataset.
-pr_m = sum_resampler(pr, 1, "month", 1, "pr")
+# # Apply the resampling function to the precipitation dataset.
+# pr_m = sum_resampler(pr, 1, "month", 1, "pr")
 
-# Evaluate the result at the location of interest.
-pprint.pprint(pr_m.getRegion(poi, scale))
+# # Evaluate the result at the location of interest.
+# pprint.pprint(pr_m.getRegion(poi, scale))
 
-# Apply the resampling function to the PET dataset.
-pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
+# # Apply the resampling function to the PET dataset.
+# pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
 
-# Evaluate the result at the location of interest.
-pprint.pprint(pet_m.getRegion(poi, scale))
+# # Evaluate the result at the location of interest.
+# pprint.pprint(pet_m.getRegion(poi, scale))
 
-# Combine precipitation and evapotranspiration.
-meteo = pr_m.combine(pet_m)
+# # Combine precipitation and evapotranspiration.
+# meteo = pr_m.combine(pet_m)
 
-# Import meteorological data as an array at the location of interest.
-meteo_arr = meteo.getRegion(poi, scale)
+# # Import meteorological data as an array at the location of interest.
+# meteo_arr = meteo.getRegion(poi, scale)
 
-# Print the result.
-pprint.pprint(meteo_arr)
+# # Print the result.
+# pprint.pprint(meteo_arr)
 
-# Transform the array into a pandas dataframe and sort the index.
-meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
+# # Transform the array into a pandas dataframe and sort the index.
+# meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
 
-# Data visualization
-fig, ax = plt.subplots(figsize=(15, 6))
+# # Data visualization
+# fig, ax = plt.subplots(figsize=(15, 6))
 
-# Barplot associated with precipitations.
-meteo_df["pr"].plot(kind="bar", ax=ax, label="precipitation")
+# # Barplot associated with precipitations.
+# meteo_df["pr"].plot(kind="bar", ax=ax, label="precipitation")
 
-# Barplot associated with potential evapotranspiration.
-meteo_df["pet"].plot(
-    kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
-)
+# # Barplot associated with potential evapotranspiration.
+# meteo_df["pet"].plot(
+#     kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
+# )
 
-# Add a legend.
-ax.legend()
+# # Add a legend.
+# ax.legend()
 
-# Add some x/y-labels properties.
-ax.set_ylabel("Intensity [mm]")
-ax.set_xlabel(None)
+# # Add some x/y-labels properties.
+# ax.set_ylabel("Intensity [mm]")
+# ax.set_xlabel(None)
 
-# Define the date format and shape of x-labels.
-x_labels = meteo_df.index.strftime("%m-%Y")
-ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
+# # Define the date format and shape of x-labels.
+# x_labels = meteo_df.index.strftime("%m-%Y")
+# ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
 
-st.pyplot(fig)
-
-#############################################################
-#############################
-##########################
-########################
-##################
-##############
-
-
-#________________________________________________Implementation of the TM procedure_________________________________________________
-
-zr = ee.Image(0.5)
-p = ee.Image(0.5)
-
-def olm_prop_mean(olm_image, band_output_name):
-    """
-    This function calculates an averaged value of
-    soil properties between reference depths.
-    """
-    mean_image = olm_image.expression(
-        "(b0 + b10 + b30 + b60 + b100 + b200) / 6",
-        {
-            "b0": olm_image.select("b0"),
-            "b10": olm_image.select("b10"),
-            "b30": olm_image.select("b30"),
-            "b60": olm_image.select("b60"),
-            "b100": olm_image.select("b100"),
-            "b200": olm_image.select("b200"),
-        },
-    ).rename(band_output_name)
-
-    return mean_image
-
-
-# Apply the function to field capacity and wilting point.
-fcm = olm_prop_mean(field_capacity, "fc_mean")
-wpm = olm_prop_mean(wilting_point, "wp_mean")
-
-# Calculate the theoretical available water.
-taw = (
-    (fcm.select("fc_mean").subtract(wpm.select("wp_mean"))).multiply(1000).multiply(zr)
-)
-
-# Calculate the stored water at the field capacity.
-stfc = taw.multiply(p)
-
-# Define the initial time (time0) according to the start of the collection.
-time0 = meteo.first().get("system:time_start")
-
-# Initialize all bands describing the hydric state of the soil.
-# Do not forget to cast the type of the data with a .float().
-# Initial recharge.
-initial_rech = ee.Image(0).set("system:time_start", time0).select([0], ["rech"]).float()
-
-# Initialization of APWL.
-initial_apwl = ee.Image(0).set("system:time_start", time0).select([0], ["apwl"]).float()
-
-# Initialization of ST.
-initial_st = stfc.set("system:time_start", time0).select([0], ["st"]).float()
-
-# Initialization of precipitation.
-initial_pr = ee.Image(0).set("system:time_start", time0).select([0], ["pr"]).float()
-
-# Initialization of potential evapotranspiration.
-initial_pet = ee.Image(0).set("system:time_start", time0).select([0], ["pet"]).float()
-
-initial_image = initial_rech.addBands(
-    ee.Image([initial_apwl, initial_st, initial_pr, initial_pet])
-)
-
-image_list = ee.List([initial_image])
-
-#_____________________________________________Iteration over an ee.ImageCollection_________________________________________________
-
-
-def recharge_calculator(image, image_list):
-    """
-    Contains operations made at each iteration.
-    """
-    # Determine the date of the current ee.Image of the collection.
-    localdate = image.date().millis()
-
-    # Import previous image stored in the list.
-    prev_im = ee.Image(ee.List(image_list).get(-1))
-
-    # Import previous APWL and ST.
-    prev_apwl = prev_im.select("apwl")
-    prev_st = prev_im.select("st")
-
-    # Import current precipitation and evapotranspiration.
-    pr_im = image.select("pr")
-    pet_im = image.select("pet")
-
-    # Initialize the new bands associated with recharge, apwl and st.
-    # DO NOT FORGET TO CAST THE TYPE WITH .float().
-    new_rech = (
-        ee.Image(0)
-        .set("system:time_start", localdate)
-        .select([0], ["rech"])
-        .float()
-    )
-
-    new_apwl = (
-        ee.Image(0)
-        .set("system:time_start", localdate)
-        .select([0], ["apwl"])
-        .float()
-    )
-
-    new_st = (
-        prev_st.set("system:time_start", localdate).select([0], ["st"]).float()
-    )
-
-    # Calculate bands depending on the situation using binary layers with
-    # logical operations.
-
-    # CASE 1.
-    # Define zone1: the area where PET > P.
-    zone1 = pet_im.gt(pr_im)
+# st.pyplot(fig)
+
+# #############################################################
+# #############################
+# ##########################
+# ########################
+# ##################
+# ##############
+
+
+# #________________________________________________Implementation of the TM procedure_________________________________________________
+
+# zr = ee.Image(0.5)
+# p = ee.Image(0.5)
+
+# def olm_prop_mean(olm_image, band_output_name):
+#     """
+#     This function calculates an averaged value of
+#     soil properties between reference depths.
+#     """
+#     mean_image = olm_image.expression(
+#         "(b0 + b10 + b30 + b60 + b100 + b200) / 6",
+#         {
+#             "b0": olm_image.select("b0"),
+#             "b10": olm_image.select("b10"),
+#             "b30": olm_image.select("b30"),
+#             "b60": olm_image.select("b60"),
+#             "b100": olm_image.select("b100"),
+#             "b200": olm_image.select("b200"),
+#         },
+#     ).rename(band_output_name)
+
+#     return mean_image
+
+
+# # Apply the function to field capacity and wilting point.
+# fcm = olm_prop_mean(field_capacity, "fc_mean")
+# wpm = olm_prop_mean(wilting_point, "wp_mean")
+
+# # Calculate the theoretical available water.
+# taw = (
+#     (fcm.select("fc_mean").subtract(wpm.select("wp_mean"))).multiply(1000).multiply(zr)
+# )
+
+# # Calculate the stored water at the field capacity.
+# stfc = taw.multiply(p)
+
+# # Define the initial time (time0) according to the start of the collection.
+# time0 = meteo.first().get("system:time_start")
+
+# # Initialize all bands describing the hydric state of the soil.
+# # Do not forget to cast the type of the data with a .float().
+# # Initial recharge.
+# initial_rech = ee.Image(0).set("system:time_start", time0).select([0], ["rech"]).float()
+
+# # Initialization of APWL.
+# initial_apwl = ee.Image(0).set("system:time_start", time0).select([0], ["apwl"]).float()
+
+# # Initialization of ST.
+# initial_st = stfc.set("system:time_start", time0).select([0], ["st"]).float()
+
+# # Initialization of precipitation.
+# initial_pr = ee.Image(0).set("system:time_start", time0).select([0], ["pr"]).float()
+
+# # Initialization of potential evapotranspiration.
+# initial_pet = ee.Image(0).set("system:time_start", time0).select([0], ["pet"]).float()
+
+# initial_image = initial_rech.addBands(
+#     ee.Image([initial_apwl, initial_st, initial_pr, initial_pet])
+# )
+
+# image_list = ee.List([initial_image])
+
+# #_____________________________________________Iteration over an ee.ImageCollection_________________________________________________
+
+
+# def recharge_calculator(image, image_list):
+#     """
+#     Contains operations made at each iteration.
+#     """
+#     # Determine the date of the current ee.Image of the collection.
+#     localdate = image.date().millis()
+
+#     # Import previous image stored in the list.
+#     prev_im = ee.Image(ee.List(image_list).get(-1))
+
+#     # Import previous APWL and ST.
+#     prev_apwl = prev_im.select("apwl")
+#     prev_st = prev_im.select("st")
+
+#     # Import current precipitation and evapotranspiration.
+#     pr_im = image.select("pr")
+#     pet_im = image.select("pet")
+
+#     # Initialize the new bands associated with recharge, apwl and st.
+#     # DO NOT FORGET TO CAST THE TYPE WITH .float().
+#     new_rech = (
+#         ee.Image(0)
+#         .set("system:time_start", localdate)
+#         .select([0], ["rech"])
+#         .float()
+#     )
+
+#     new_apwl = (
+#         ee.Image(0)
+#         .set("system:time_start", localdate)
+#         .select([0], ["apwl"])
+#         .float()
+#     )
+
+#     new_st = (
+#         prev_st.set("system:time_start", localdate).select([0], ["st"]).float()
+#     )
+
+#     # Calculate bands depending on the situation using binary layers with
+#     # logical operations.
+
+#     # CASE 1.
+#     # Define zone1: the area where PET > P.
+#     zone1 = pet_im.gt(pr_im)
 
-    # Calculation of APWL in zone 1.
-    zone1_apwl = prev_apwl.add(pet_im.subtract(pr_im)).rename("apwl")
-    # Implementation of zone 1 values for APWL.
-    new_apwl = new_apwl.where(zone1, zone1_apwl)
-
-    # Calculate ST in zone 1.
-    zone1_st = prev_st.multiply(
-        ee.Image.exp(zone1_apwl.divide(stfc).multiply(-1))
-    ).rename("st")
-    # Implement ST in zone 1.
-    new_st = new_st.where(zone1, zone1_st)
-
-    # CASE 2.
-    # Define zone2: the area where PET <= P.
-    zone2 = pet_im.lte(pr_im)
-
-    # Calculate ST in zone 2.
-    zone2_st = prev_st.add(pr_im).subtract(pet_im).rename("st")
-    # Implement ST in zone 2.
-    new_st = new_st.where(zone2, zone2_st)
-
-    # CASE 2.1.
-    # Define zone21: the area where PET <= P and ST >= STfc.
-    zone21 = zone2.And(zone2_st.gte(stfc))
-
-    # Calculate recharge in zone 21.
-    zone21_re = zone2_st.subtract(stfc).rename("rech")
-    # Implement recharge in zone 21.
-    new_rech = new_rech.where(zone21, zone21_re)
-    # Implement ST in zone 21.
-    new_st = new_st.where(zone21, stfc)
-
-    # CASE 2.2.
-    # Define zone 22: the area where PET <= P and ST < STfc.
-    zone22 = zone2.And(zone2_st.lt(stfc))
-
-    # Calculate APWL in zone 22.
-    zone22_apwl = (
-        stfc.multiply(-1).multiply(ee.Image.log(zone2_st.divide(stfc))).rename("apwl")
-    )
-    # Implement APWL in zone 22.
-    new_apwl = new_apwl.where(zone22, zone22_apwl)
-
-    # Create a mask around area where recharge can effectively be calculated.
-    # Where we have have PET, P, FCm, WPm (except urban areas, etc.).
-    mask = pet_im.gte(0).And(pr_im.gte(0)).And(fcm.gte(0)).And(wpm.gte(0))
-
-    # Apply the mask.
-    new_rech = new_rech.updateMask(mask)
-
-    # Add all Bands to our ee.Image.
-    new_image = new_rech.addBands(ee.Image([new_apwl, new_st, pr_im, pet_im]))
-
-    # Add the new ee.Image to the ee.List.
-    return ee.List(image_list).add(new_image)
-
-# Iterate the user-supplied function to the meteo collection.
-rech_list = meteo.iterate(recharge_calculator, image_list)
-
-# Remove the initial image from our list.
-rech_list = ee.List(rech_list).remove(initial_image)
-
-# Transform the list into an ee.ImageCollection.
-rech_coll = ee.ImageCollection(rech_list)
-
-arr = rech_coll.getRegion(poi, scale).getInfo()
-rdf = ee_array_to_df(arr, ["pr", "pet", "apwl", "st", "rech"]).sort_index()
-rdf.head(12)
-
-# Data visualization in the form of barplots.
-fig, ax = plt.subplots(figsize=(15, 6))
-
-# Barplot associated with precipitation.
-rdf["pr"].plot(kind="bar", ax=ax, label="precipitation", alpha=0.5)
-
-# Barplot associated with potential evapotranspiration.
-rdf["pet"].plot(
-    kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.2
-)
-
-# Barplot associated with groundwater recharge
-rdf["rech"].plot(kind="bar", ax=ax, label="recharge", color="green", alpha=1)
-
-# Add a legend.
-ax.legend()
-
-# Define x/y-labels properties.
-ax.set_ylabel("Intensity [mm]")
-ax.set_xlabel(None)
-
-# Define the date format and shape of x-labels.
-x_labels = rdf.index.strftime("%m-%Y")
-ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
-
-st.pyplot(fig)
-
-# Resample the pandas dataframe on a yearly basis making the sum by year.
-rdfy = rdf.resample("Y").sum()
-
-# Calculate the mean value.
-mean_recharge = rdfy["rech"].mean()
-
-# Print the result.
-st.write(
-    "The mean annual recharge at our point of interest is", int(mean_recharge), "mm/an"
-)
+#     # Calculation of APWL in zone 1.
+#     zone1_apwl = prev_apwl.add(pet_im.subtract(pr_im)).rename("apwl")
+#     # Implementation of zone 1 values for APWL.
+#     new_apwl = new_apwl.where(zone1, zone1_apwl)
+
+#     # Calculate ST in zone 1.
+#     zone1_st = prev_st.multiply(
+#         ee.Image.exp(zone1_apwl.divide(stfc).multiply(-1))
+#     ).rename("st")
+#     # Implement ST in zone 1.
+#     new_st = new_st.where(zone1, zone1_st)
+
+#     # CASE 2.
+#     # Define zone2: the area where PET <= P.
+#     zone2 = pet_im.lte(pr_im)
+
+#     # Calculate ST in zone 2.
+#     zone2_st = prev_st.add(pr_im).subtract(pet_im).rename("st")
+#     # Implement ST in zone 2.
+#     new_st = new_st.where(zone2, zone2_st)
+
+#     # CASE 2.1.
+#     # Define zone21: the area where PET <= P and ST >= STfc.
+#     zone21 = zone2.And(zone2_st.gte(stfc))
+
+#     # Calculate recharge in zone 21.
+#     zone21_re = zone2_st.subtract(stfc).rename("rech")
+#     # Implement recharge in zone 21.
+#     new_rech = new_rech.where(zone21, zone21_re)
+#     # Implement ST in zone 21.
+#     new_st = new_st.where(zone21, stfc)
+
+#     # CASE 2.2.
+#     # Define zone 22: the area where PET <= P and ST < STfc.
+#     zone22 = zone2.And(zone2_st.lt(stfc))
+
+#     # Calculate APWL in zone 22.
+#     zone22_apwl = (
+#         stfc.multiply(-1).multiply(ee.Image.log(zone2_st.divide(stfc))).rename("apwl")
+#     )
+#     # Implement APWL in zone 22.
+#     new_apwl = new_apwl.where(zone22, zone22_apwl)
+
+#     # Create a mask around area where recharge can effectively be calculated.
+#     # Where we have have PET, P, FCm, WPm (except urban areas, etc.).
+#     mask = pet_im.gte(0).And(pr_im.gte(0)).And(fcm.gte(0)).And(wpm.gte(0))
+
+#     # Apply the mask.
+#     new_rech = new_rech.updateMask(mask)
+
+#     # Add all Bands to our ee.Image.
+#     new_image = new_rech.addBands(ee.Image([new_apwl, new_st, pr_im, pet_im]))
+
+#     # Add the new ee.Image to the ee.List.
+#     return ee.List(image_list).add(new_image)
+
+# # Iterate the user-supplied function to the meteo collection.
+# rech_list = meteo.iterate(recharge_calculator, image_list)
+
+# # Remove the initial image from our list.
+# rech_list = ee.List(rech_list).remove(initial_image)
+
+# # Transform the list into an ee.ImageCollection.
+# rech_coll = ee.ImageCollection(rech_list)
+
+# arr = rech_coll.getRegion(poi, scale).getInfo()
+# rdf = ee_array_to_df(arr, ["pr", "pet", "apwl", "st", "rech"]).sort_index()
+# rdf.head(12)
+
+# # Data visualization in the form of barplots.
+# fig, ax = plt.subplots(figsize=(15, 6))
+
+# # Barplot associated with precipitation.
+# rdf["pr"].plot(kind="bar", ax=ax, label="precipitation", alpha=0.5)
+
+# # Barplot associated with potential evapotranspiration.
+# rdf["pet"].plot(
+#     kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.2
+# )
+
+# # Barplot associated with groundwater recharge
+# rdf["rech"].plot(kind="bar", ax=ax, label="recharge", color="green", alpha=1)
+
+# # Add a legend.
+# ax.legend()
+
+# # Define x/y-labels properties.
+# ax.set_ylabel("Intensity [mm]")
+# ax.set_xlabel(None)
+
+# # Define the date format and shape of x-labels.
+# x_labels = rdf.index.strftime("%m-%Y")
+# ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
+
+# st.pyplot(fig)
+
+# # Resample the pandas dataframe on a yearly basis making the sum by year.
+# rdfy = rdf.resample("Y").sum()
+
+# # Calculate the mean value.
+# mean_recharge = rdfy["rech"].mean()
+
+# # Print the result.
+# st.write(
+#     "The mean annual recharge at our point of interest is", int(mean_recharge), "mm/an"
+# )
 
 
 
