@@ -429,6 +429,7 @@ pet = (
 local_pr = pr.getRegion(poi, scale)
 pprint.pprint(local_pr)
 
+
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
     df = pd.DataFrame(arr)
@@ -453,7 +454,10 @@ def ee_array_to_df(arr, list_of_bands):
     return df
 
 pr_df = ee_array_to_df(local_pr, ["precipitation"])
-##pr_df.head(10)
+
+# Display the resulting dataframe in Streamlit
+st.write(pr_df.head(10))
+
 
 # Evaluate local potential evapotranspiration.
 local_pet = pet.getRegion(poi, scale)
