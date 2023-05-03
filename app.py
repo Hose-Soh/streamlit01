@@ -136,10 +136,11 @@ my_map = geemap.Map(center=[lat, lon], zoom=3)
 
 # Set visualization parameters.
 vis_params = {
+    
     "min": 0.01,
     "max": 1,
     "opacity": 1,
-    "palette": ["white", "#464646"],
+    
 }
 
 # Add the sand content data to the map object.
