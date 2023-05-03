@@ -432,8 +432,8 @@ pet = (
 )
 
 # Evaluate local precipitation conditions.
-local_pr = pr.getRegion(poi, scale).getInfo()
-pprint.pprint(local_pr[:5])
+local_pr = pr.getRegion(poi, scale)
+##pprint.pprint(local_pr[:5])
 
 def ee_array_to_df(arr):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
