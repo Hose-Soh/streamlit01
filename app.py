@@ -60,6 +60,10 @@ import branca.colormap as cm
 i_date = st.date_input("Initial date of interest (inclusive)", min_value=datetime.strptime('1992-01-01', '%Y-%m-%d'), max_value = datetime.now())
 f_date = st.date_input("Final date of interest (exclusive)",min_value=datetime.strptime('1992-01-01', "%Y-%m-%d"), max_value = datetime.now())
 
+# Convert the datetime objects to ee.Date objects
+i_date = ee.Date(i_date)
+f_date = ee.Date(f_date)
+
 # Take input from user for lon and lat
 lon = st.number_input("Enter the longitude", value=5.145041)
 lat = st.number_input("Enter the latitude", value=45.772439)
