@@ -5,6 +5,7 @@ import ee
 import geemap.colormaps as cm
 import geemap.foliumap as geemap
 import streamlit as st
+from streamlit_folium import folium_static
 
 # ______ GEE Authenthication ______
 
@@ -156,7 +157,7 @@ folium.Marker([lat, lon], popup="point of interest").add_to(my_map)
 my_map.add_child(folium.LayerControl())
 
 # Display the map.
-my_map.to_streamlit(height=600,  responsive=True, scrolling=False)
+folium_static(my_map, height=600, responsive=True, scrolling=False)
 
 
 def local_profile(dataset, poi, buffer):
