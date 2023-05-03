@@ -427,7 +427,7 @@ pet = (
 
 # Evaluate local precipitation conditions.
 local_pr = pr.getRegion(poi, scale)
-pprint.pprint(local_pr[:5])
+pprint.pprint(local_pr)
 
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
@@ -528,13 +528,13 @@ def sum_resampler(coll, freq, unit, scale_factor, band_name):
 pr_m = sum_resampler(pr, 1, "month", 1, "pr")
 
 # Evaluate the result at the location of interest.
-pprint.pprint(pr_m.getRegion(poi, scale)[:5])
+pprint.pprint(pr_m.getRegion(poi, scale))
 
 # Apply the resampling function to the PET dataset.
 pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
 
 # Evaluate the result at the location of interest.
-pprint.pprint(pet_m.getRegion(poi, scale)[:5])
+pprint.pprint(pet_m.getRegion(poi, scale))
 
 # Combine precipitation and evapotranspiration.
 meteo = pr_m.combine(pet_m)
@@ -543,7 +543,7 @@ meteo = pr_m.combine(pet_m)
 meteo_arr = meteo.getRegion(poi, scale)
 
 # Print the result.
-pprint.pprint(meteo_arr[:5])
+pprint.pprint(meteo_arr)
 
 # Transform the array into a pandas dataframe and sort the index.
 meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
