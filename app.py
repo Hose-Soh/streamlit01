@@ -112,22 +112,10 @@ def get_soil_prop(param):
 #________________________________________Visualization for Soil Content___________________________________________
 
 
-# Define the Earth Engine image collection
-dataset = ee.ImageCollection("OpenLandMap/SOL/SOL_PHIHOX_MEDR")
-
-# Define the location of interest
-lat, lon = 46.2044, 6.1432
-poi = ee.Geometry.Point(lon, lat)
-scale = 30
-
-# Define the soil properties of interest
-olm_bands = ["BDRICM", "CLYPPT", "ORCDRC", "PHIHOX"]
-olm_depths = [5, 15, 30, 60, 100]
-
 # Get soil property images
-sand = dataset.select("BDRICM").first()
-clay = dataset.select("CLYPPT").first()
-orgc = dataset.select("ORCDRC").first()
+sand = get_soil_prop("sand")
+clay = get_soil_prop("clay")
+orgc = get_soil_prop("orgc")
 #ph = dataset.select("PHIHOX").first()
 
 
@@ -151,7 +139,7 @@ my_map = folium.Map(location=[lat, lon], zoom_start=3)
 
 # Set visualization parameters.
 vis_params = {
-    "bands": ["BDRICM"],
+    "bands": ["b0"],
     "min": 0.01,
     "max": 1,
     "opacity": 1,
