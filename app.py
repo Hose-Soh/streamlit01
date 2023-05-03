@@ -430,12 +430,15 @@ local_pr = pr.getRegion(poi, scale)
 pprint.pprint(local_pr)
 
 
+
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    arr = list(arr)
-    df = pd.DataFrame(arr[1:], columns=arr[0])
+    df = pd.DataFrame(arr)
 
-    
+    # Rearrange the header.
+    headers = df.iloc[0]
+    df = pd.DataFrame(df.values[1:], columns=headers)
+
     # Convert the data to numeric values.
     for band in list_of_bands:
         df[band] = pd.to_numeric(df[band], errors="coerce")
@@ -451,7 +454,7 @@ def ee_array_to_df(arr, list_of_bands):
 
     return df
 
-pr_df = ee_array_to_df(local_pr, ["precipitation"])
+pr_df = ee_array_to_df(local_pr.tolist(), ["precipitation"])
 #pr_df.head(10)
 
 
