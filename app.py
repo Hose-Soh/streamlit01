@@ -24,7 +24,7 @@ ee.Initialize(credentials)
 
 # _______________________ LAYOUT CONFIGURATION __________________________
 
-st.set_page_config(page_title='SST monitor', layout="wide")
+st.set_page_config(page_title='Soil Data Exploration')
 
 # shape the map
 st.markdown(
