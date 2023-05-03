@@ -56,9 +56,9 @@ import branca.colormap as cm
 #__________________________Input Parameters________________________
 
 
-# Define the date range slider
-i_date = st.date_input("Initial date of interest (inclusive)", min_value=datetime.strptime('1992-01-01', '%Y-%m-%d'), max_value = datetime.strptime('2023-03-30', "%Y-%m-%d"))
-f_date = st.date_input("Final date of interest (exclusive)",min_value=datetime.strptime('1992-01-01', "%Y-%m-%d"), max_value = datetime.strptime('2023-03-30', "%Y-%m-%d"))
+# Define the date range slide
+i_date = st.date_input("Initial date of interest (inclusive)", min_value=datetime.strptime('2015-01-01', '%Y-%m-%d'), max_value = datetime.strptime('2020-01-01', "%Y-%m-%d"))
+f_date = st.date_input("Final date of interest (exclusive)",min_value=datetime.strptime('2015-01-01', "%Y-%m-%d"), max_value = datetime.strptime('2020-01-01', "%Y-%m-%d"))
 
 
 
