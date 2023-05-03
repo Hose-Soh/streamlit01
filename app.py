@@ -274,12 +274,8 @@ orgm = orgc.multiply(1.724)
 profile_orgm = local_profile(orgm, poi, scale)
 
 #Print the organic matter content profile.
-st.write("Organic Matter content profile at the location of interest:")
-try:
-    st.write(profile_orgm.getInfo())
-except IndexError:
-    st.write("Error: profile_orgm is empty or index is out of range.")
-
+st.write("Organic Matter content profile at the location of interest: ", profile_orgm)
+##st.write(.getInfo())
 
 #Initialization of two constant images for wilting point and field capacity.
 wilting_point = ee.Image(0)
