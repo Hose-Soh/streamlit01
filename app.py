@@ -432,12 +432,9 @@ pprint.pprint(local_pr)
 
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    df = pd.DataFrame(arr)
+    df = pd.DataFrame(arr[1:], columns=arr[0])
 
-    # Rearrange the header.
-    headers = df.iloc[0]
-    df = pd.DataFrame(df.values[1:], columns=headers)
-
+    
     # Convert the data to numeric values.
     for band in list_of_bands:
         df[band] = pd.to_numeric(df[band], errors="coerce")
