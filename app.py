@@ -454,8 +454,8 @@ def ee_array_to_df(arr, list_of_bands):
 
     return df
 
-# pr_df = ee_array_to_df(local_pr, ["precipitation"])
-# #pr_df.head(10)
+pr_df = ee_array_to_df(local_pr, ["precipitation"])
+#pr_df.head(10)
 
 
 
