@@ -426,7 +426,7 @@ pet = (
 )
 
 # Evaluate local precipitation conditions.
-local_pr = pr.getRegion(poi, scale).getInfo()
+local_pr = pr.reduceRegion(reducer=ee.Reducer.toList(), geometry=poi, scale=scale).get("precipitation").getInfo()
 pprint.pprint(local_pr)
 
 
