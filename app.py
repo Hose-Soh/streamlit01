@@ -58,21 +58,9 @@ import branca.colormap as cm
 
 # Define the date range slider
 i_date = st.date_input("Initial date of interest (inclusive)", min_value=datetime.strptime('1992-01-01', '%Y-%m-%d'), max_value = datetime.now())
-f_date = st.date_input("Final date of interest (exclusive)",min_value=datetime.strptime('1992-01-01', "%Y-%m-%d"), max_value = datetime.now())
+f_date = st.date_input("Final date of interest (exclusive)",min_value=datetime.strptime('1992-01-01', "%Y-%m-%d"), max_value = datetime.strptime('2023-03-31', "%Y-%m-%d"))
 
-# conditions to get the available layer 2 days before today
-if str(i_date) == str(date.today()):
-    i_date = i_date - timedelta(2)
 
-if str(i_date) == str(date.today() - timedelta(1)):
-        i_date = i_date - timedelta(1)
-
-# conditions to get the available layer 2 days before today
-if str(f_date) == str(date.today()):
-    f_date = f_date - timedelta(2)
-
-if str(f_date) == str(date.today() - timedelta(1)):
-    f_date = f_date - timedelta(1)
 
 # Take input from user for lon and lat
 lon = st.number_input("Enter the longitude", value=5.145041)
