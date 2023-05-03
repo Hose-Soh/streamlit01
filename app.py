@@ -57,8 +57,8 @@ import branca.colormap as cm
 
 
 # Define the date range slider
-i_date = st.date_input("Initial date of interest (inclusive)", value=datetime.date(2015, 1, 1), min_value=datetime.date(1970, 1, 1), max_value=datetime.date(2100, 12, 31))
-f_date = st.date_input("Final date of interest (exclusive)", value=datetime.date(2020, 1, 1), min_value=datetime.date(1970, 1, 1), max_value=datetime.date(2100, 12, 31))
+i_date = st.date_input("Initial date of interest (inclusive)", value=datetime.date('2015, 1, 1'), min_value=datetime.date(1970, 1, 1), max_value=datetime.date('2100, 12, 31'))
+f_date = st.date_input("Final date of interest (exclusive)", value=datetime.date('2020, 1, 1'), min_value=datetime.date(1970, 1, 1), max_value=datetime.date('2100, 12, 31'))
 
 # Take input from user for lon and lat
 lon = st.number_input("Enter the longitude", value=5.145041)
@@ -67,6 +67,3 @@ poi = ee.Geometry.Point(lon, lat)
 
 # A nominal scale in meters of the projection to work in [in meters].
 scale = 1000
-
-
-
