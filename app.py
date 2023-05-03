@@ -426,47 +426,33 @@ pet = (
 )
 
 # Evaluate local precipitation conditions.
-local_pr = pr.getRegion(poi, scale)
+local_pr = np.array(pr.getRegion(poi, scale))
 pprint.pprint(local_pr)
 
 
 
-import numpy as np
-import pandas as pd
-
-import numpy as np
-import pandas as pd
-
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    if arr.ndim == 1:
-        arr = np.expand_dims(arr, axis=0)
-    elif arr.ndim != 2:
-        raise ValueError("Input array must have 2 dimensions")
-    if arr.shape[0] < 2 or arr.shape[1] < 1:
-        raise ValueError("Input array must have at least 2 rows and 1 column")
-    
-    headers = arr[0,:]
-    data = arr[1:,:].astype(float)
+    df = pd.DataFrame(arr)
+
+    # Rearrange the header.
+    headers = df.iloc[0]
+    df = pd.DataFrame(df.values[1:], columns=headers)
 
     # Convert the data to numeric values.
     for band in list_of_bands:
-        band_idx = np.where(headers == band)[0][0]
-        data[:,band_idx] = pd.to_numeric(data[:,band_idx], errors="coerce")
+        df[band] = pd.to_numeric(df[band], errors="coerce")
 
     # Convert the time field into a datetime.
-    time_idx = np.where(headers == 'time')[0][0]
-    datetimes = pd.to_datetime(data[:,time_idx], unit='ms')
-    
-    # Create the DataFrame.
-    df = pd.DataFrame(data, columns=headers)
-    df['datetime'] = datetimes
-    df.set_index('datetime', inplace=True)
-    df.drop(columns=['time'], inplace=True)
-    
+    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
+
+    # Keep the columns of interest.
+    df = df[["time", "datetime", *list_of_bands]]
+
+    # The datetime column is defined as index.
+    df = df.set_index("datetime")
+
     return df
-
-
 
 pr_df = ee_array_to_df(local_pr, ["precipitation"])
 #pr_df.head(10)
