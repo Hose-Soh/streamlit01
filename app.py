@@ -429,26 +429,50 @@ pet = (
 local_pr = pr.getRegion(poi, scale).getInfo()
 pprint.pprint(local_pr[:5])
 
-def ee_array_to_df(arr, list_of_bands):
-    """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    df = pd.DataFrame(arr)
+# def ee_array_to_df(arr, list_of_bands):
+#     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
+#     df = pd.DataFrame(arr)
 
-    # Rearrange the header.
-    headers = df.iloc[0]
-    df = pd.DataFrame(df.values[1:], columns=headers)
+#     # Rearrange the header. 
+#     headers = df.iloc[0]
+#     df = pd.DataFrame(df.values[1:], columns=headers)
 
-    # Convert the data to numeric values.
-    for band in list_of_bands:
-        df[band] = pd.to_numeric(df[band], errors="coerce")
+#     # Convert the data to numeric values.
+#     for band in list_of_bands:
+#         df[band] = pd.to_numeric(df[band], errors="coerce")
 
-    # Convert the time field into a datetime.
-    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
+#     # Convert the time field into a datetime.
+#     df["datetime"] = pd.to_datetime(df["time"], unit="ms")
 
-    # Keep the columns of interest.
-    df = df[["time", "datetime", *list_of_bands]]
+#     # Keep the columns of interest.
+#     df = df[["time", "datetime", *list_of_bands]]
 
-    # The datetime column is defined as index.
-    df = df.set_index("datetime")
+#     # The datetime column is defined as index.
+#     df = df.set_index("datetime")
+
+#     return df
+
+def ee_array_to_df(getRegionArray, bands):
+    # Convert the getRegionArray to a list
+    getRegionList = getRegionArray.getInfo()
+
+    # Get the header row and data rows
+    header = getRegionList[0]
+    data = getRegionList[1:]
+
+    # Create a list of dictionaries, where each dictionary corresponds to a row of data
+    rows = []
+    for row in data:
+        row_dict = {}
+        for i, band in enumerate(bands):
+            row_dict[band] = row[i+1] # The first column is the pixel ID, so skip it
+        rows.append(row_dict)
+
+    # Convert the list of dictionaries to a Pandas DataFrame
+    df = pd.DataFrame(rows)
+
+    # Set the index to be the pixel ID
+    df.set_index(header[0], inplace=True)
 
     return df
 
