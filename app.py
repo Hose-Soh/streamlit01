@@ -58,7 +58,7 @@ import branca.colormap as cm
 
 # Define the date range slider
 i_date = st.date_input("Initial date of interest (inclusive)", min_value=datetime.strptime('1992-10-02', '%Y-%m-%d'), max_value = datetime.now())
-f_date = st.date_input("Final date of interest (exclusive)", min_value=datetime.strptime('1992-10-02', '%Y-%m-%d'), max_value = datetime.now())
+f_date = st.date_input("Final date of interest (exclusive)", max_value = datetime.now())
 
 # Take input from user for lon and lat
 lon = st.number_input("Enter the longitude", value=5.145041)
@@ -411,6 +411,13 @@ st.pyplot(fig)
 
 #_____________________________________________Getting Meteorological Datasets_____________________________________________
 
+# Import precipitation.
+pr = (
+    ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
+    .select("precipitation")
+    .filterDate(i_date, f_date)
+)
+
 # Import potential evaporation PET and its quality indicator ET_QC.
 pet = (
     ee.ImageCollection("MODIS/006/MOD16A2")
@@ -418,114 +425,128 @@ pet = (
     .filterDate(i_date, f_date)
 )
 
-# Get the precipitation data for the point of interest and date range
-pr = (
-    ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
-    .filterDate(i_date, f_date)
-    .select('precipitation')
-    .filterBounds(poi)
-)
+# Evaluate local precipitation conditions.
+local_pr = pr.getRegion(poi, scale).getInfo()
+pprint.pprint(local_pr[:5])
 
-# Reduce the data to a single point using mean
-pr_point = pr.reduce(ee.Reducer.mean()).getInfo()
+def ee_array_to_df(arr, list_of_bands):
+    """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
+    df = pd.DataFrame(arr)
 
-# Convert the data to a pandas dataframe
-pr_df = pd.DataFrame([pr_point['precipitation']], columns=['precipitation'])
+    # Rearrange the header.
+    headers = df.iloc[0]
+    df = pd.DataFrame(df.values[1:], columns=headers)
 
+    # Convert the data to numeric values.
+    for band in list_of_bands:
+        df[band] = pd.to_numeric(df[band], errors="coerce")
 
+    # Convert the time field into a datetime.
+    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
 
-# # Evaluate local potential evapotranspiration.
-# local_pet = pet.getRegion(poi, scale)
+    # Keep the columns of interest.
+    df = df[["time", "datetime", *list_of_bands]]
 
-# # Transform the result into a pandas dataframe.
-# pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
-# pet_df.head(5)
+    # The datetime column is defined as index.
+    df = df.set_index("datetime")
 
-# def sum_resampler(coll, freq, unit, scale_factor, band_name):
-#     """
-#     This function aims to resample the time scale of an ee.ImageCollection.
-#     The function returns an ee.ImageCollection with the averaged sum of the
-#     band on the selected frequency.
+    return df
 
-#     coll: (ee.ImageCollection) only one band can be handled
-#     freq: (int) corresponds to the resampling frequence
-#     unit: (str) corresponds to the resampling time unit.
-#                 must be 'day', 'month' or 'year'
-#     scale_factor (float): scaling factor used to get our value in the good unit
-#     band_name (str) name of the output band
-#     """
+pr_df = ee_array_to_df(local_pr, ["precipitation"])
+pr_df.head(10)
 
-#     # Define initial and final dates of the collection.
-#     firstdate = ee.Date(
-#         coll.sort("system:time_start", True).first().get("system:time_start")
-#     )
+# Evaluate local potential evapotranspiration.
+local_pet = pet.getRegion(poi, scale).getInfo()
 
-#     lastdate = ee.Date(
-#         coll.sort("system:time_start", False).first().get("system:time_start")
-#     )
+# Transform the result into a pandas dataframe.
+pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
+pet_df.head(5)
 
-#     # Calculate the time difference between both dates.
-#     # https://developers.google.com/earth-engine/apidocs/ee-date-difference
-#     diff_dates = lastdate.difference(firstdate, unit)
+def sum_resampler(coll, freq, unit, scale_factor, band_name):
+    """
+    This function aims to resample the time scale of an ee.ImageCollection.
+    The function returns an ee.ImageCollection with the averaged sum of the
+    band on the selected frequency.
 
-#     # Define a new time index (for output).
-#     new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
+    coll: (ee.ImageCollection) only one band can be handled
+    freq: (int) corresponds to the resampling frequence
+    unit: (str) corresponds to the resampling time unit.
+                must be 'day', 'month' or 'year'
+    scale_factor (float): scaling factor used to get our value in the good unit
+    band_name (str) name of the output band
+    """
 
-#     # Define the function that will be applied to our new time index.
-#     def apply_resampling(date_index):
-#         # Define the starting date to take into account.
-#         startdate = firstdate.advance(ee.Number(date_index), unit)
+    # Define initial and final dates of the collection.
+    firstdate = ee.Date(
+        coll.sort("system:time_start", True).first().get("system:time_start")
+    )
 
-#         # Define the ending date to take into account according
-#         # to the desired frequency.
-#         enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
+    lastdate = ee.Date(
+        coll.sort("system:time_start", False).first().get("system:time_start")
+    )
 
-#         # Calculate the number of days between starting and ending days.
-#         diff_days = enddate.difference(startdate, "day")
+    # Calculate the time difference between both dates.
+    # https://developers.google.com/earth-engine/apidocs/ee-date-difference
+    diff_dates = lastdate.difference(firstdate, unit)
 
-#         # Calculate the composite image.
-#         image = (
-#             coll.filterDate(startdate, enddate)
-#             .mean()
-#             .multiply(diff_days)
-#             .multiply(scale_factor)
-#             .rename(band_name)
-#         )
+    # Define a new time index (for output).
+    new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
 
-#         # Return the final image with the appropriate time index.
-#         return image.set("system:time_start", startdate.millis())
+    # Define the function that will be applied to our new time index.
+    def apply_resampling(date_index):
+        # Define the starting date to take into account.
+        startdate = firstdate.advance(ee.Number(date_index), unit)
 
-#     # Map the function to the new time index.
-#     res = new_index.map(apply_resampling)
+        # Define the ending date to take into account according
+        # to the desired frequency.
+        enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
 
-#     # Transform the result into an ee.ImageCollection.
-#     res = ee.ImageCollection(res)
+        # Calculate the number of days between starting and ending days.
+        diff_days = enddate.difference(startdate, "day")
 
-#     return res
+        # Calculate the composite image.
+        image = (
+            coll.filterDate(startdate, enddate)
+            .mean()
+            .multiply(diff_days)
+            .multiply(scale_factor)
+            .rename(band_name)
+        )
 
-# # Apply the resampling function to the precipitation dataset.
-# pr_m = sum_resampler(pr, 1, "month", 1, "pr")
+        # Return the final image with the appropriate time index.
+        return image.set("system:time_start", startdate.millis())
 
-# # Evaluate the result at the location of interest.
-# pprint.pprint(pr_m.getRegion(poi, scale))
+    # Map the function to the new time index.
+    res = new_index.map(apply_resampling)
 
-# # Apply the resampling function to the PET dataset.
-# pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
+    # Transform the result into an ee.ImageCollection.
+    res = ee.ImageCollection(res)
 
-# # Evaluate the result at the location of interest.
-# pprint.pprint(pet_m.getRegion(poi, scale))
+    return res
 
-# # Combine precipitation and evapotranspiration.
-# meteo = pr_m.combine(pet_m)
+# Apply the resampling function to the precipitation dataset.
+pr_m = sum_resampler(pr, 1, "month", 1, "pr")
 
-# # Import meteorological data as an array at the location of interest.
-# meteo_arr = meteo.getRegion(poi, scale)
+# Evaluate the result at the location of interest.
+pprint.pprint(pr_m.getRegion(poi, scale).getInfo()[:5])
 
-# # Print the result.
-# pprint.pprint(meteo_arr)
+# Apply the resampling function to the PET dataset.
+pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
 
-# # Transform the array into a pandas dataframe and sort the index.
-# meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
+# Evaluate the result at the location of interest.
+pprint.pprint(pet_m.getRegion(poi, scale).getInfo()[:5])
+
+# Combine precipitation and evapotranspiration.
+meteo = pr_m.combine(pet_m)
+
+# Import meteorological data as an array at the location of interest.
+meteo_arr = meteo.getRegion(poi, scale).getInfo()
+
+# Print the result.
+pprint.pprint(meteo_arr[:5])
+
+# Transform the array into a pandas dataframe and sort the index.
+meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
 
 # # Data visualization
 # fig, ax = plt.subplots(figsize=(15, 6))
