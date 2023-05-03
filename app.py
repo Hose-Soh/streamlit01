@@ -454,7 +454,7 @@ local_pr = pr.getRegion(poi, scale)
 
 def ee_array_to_df(getRegionArray, bands):
     # Convert the getRegionArray to a list
-    getRegionList = getRegionArray.getInfo()
+    getRegionList = getRegionArray
 
     # Get the header row and data rows
     header = getRegionList[0]
