@@ -266,6 +266,8 @@ ax.legend(
 # Display the plot using Streamlit.
 st.pyplot(fig)
 
+#___________________________________________________Calculate Hydraulic Properties_____________________________________________________________
+
 
 #Conversion of organic carbon content into organic matter content.
 orgm = orgc.multiply(1.724)
@@ -345,9 +347,65 @@ profile_wp = local_profile(wilting_point, poi, scale)
 profile_fc = local_profile(field_capacity, poi, scale)
 
 st.write("Wilting point profile: ", profile_wp)
-
-
 st.write("Field capacity profile:", profile_fc)
 
+#_________________________________________Hydraulic Properties Visualization__________________________________________________
+
+
+fig, ax = plt.subplots(figsize=(15, 6))
+ax.axes.get_yaxis().set_visible(False)
+
+# Definition of the label locations.
+x = np.arange(len(olm_bands))
+
+# Width of the bar of the barplot.
+width = 0.25
+
+# Barplot associated with the water content at the wilting point.
+rect1 = ax.bar(
+    x - width / 2,
+    [round(profile_wp[b] * 100, 2) for b in olm_bands],
+    width,
+    label="Water content at wilting point",
+    color="red",
+    alpha=0.5,
+)
+
+# Barplot associated with the water content at the field capacity.
+rect2 = ax.bar(
+    x + width / 2,
+    [round(profile_fc[b] * 100, 2) for b in olm_bands],
+    width,
+    label="Water content at field capacity",
+    color="blue",
+    alpha=0.5,
+)
+
+# Add Labels on top of bars.
+autolabel_soil_prop(rect1)
+autolabel_soil_prop(rect2)
+
+# Title of the plot.
+ax.set_title("Hydraulic properties of the soil at different depths", fontsize=14)
+
+# Properties of x/y labels and ticks.
+ax.set_xticks(x)
+x_labels = [str(d) + " cm" for d in olm_depths]
+ax.set_xticklabels(x_labels, rotation=45, fontsize=10)
+
+ax.spines["left"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.spines["top"].set_visible(False)
+
+# Shrink current axis's height by 10% on the bottom.
+box = ax.get_position()
+ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+
+# Put a legend below current axis.
+ax.legend(
+    loc="upper center", bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=2
+)
+
+st.pyplot(fig)
 
 
