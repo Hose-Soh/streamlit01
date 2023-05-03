@@ -1,0 +1,16 @@
+--find-links=https://girder.github.io/large_image_wheels GDAL
+# cartopy
+geemap
+geopandas
+ee
+jupyter-server-proxy
+leafmap
+localtileserver
+nbserverproxy
+owslib
+palettable
+plotly
+streamlit==1.12.2
+streamlit-bokeh-events
+streamlit-folium
+tropycal
