@@ -426,7 +426,8 @@ pet = (
 )
 
 # Evaluate local precipitation conditions.
-local_pr = pr.getRegion(poi, scale).getInfo()
+##local_pr = pr.getRegion(poi, scale).getInfo()
+local_pr = np.array(pr.getRegion(poi, scale).get("pr"), dtype=np.float).reshape((-1, 1))
 ##pprint.pprint(local_pr[:5])
 st.write(local_pr[:5])
 
@@ -457,7 +458,8 @@ pr_df = ee_array_to_df(local_pr, ["precipitation"])
 pr_df.head(10)
 
 # Evaluate local potential evapotranspiration.
-local_pet = pet.getRegion(poi, scale).getInfo()
+##local_pet = pet.getRegion(poi, scale).getInfo()
+local_pet = np.array(pet.getRegion(poi, scale).get("pet"), dtype=np.float).reshape((-1, 1))
 
 # Transform the result into a pandas dataframe.
 pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
@@ -530,14 +532,18 @@ pr_m = sum_resampler(pr, 1, "month", 1, "pr")
 
 # Evaluate the result at the location of interest.
 ##pprint.pprint(pr_m.getRegion(poi, scale).getInfo()[:5])
-result = pr_m.getRegion(poi, scale).getInfo()[:5]
+#result = pr_m.getRegion(poi, scale).getInfo()[:5]
+result = np.array(pr_m.getRegion(poi, scale).get("pr_m"), dtype=np.float).reshape((-1, 1))[:5]
+
 st.write(result)
 
 # Apply the resampling function to the PET dataset.
 pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
 
 # Evaluate the result at the location of interest.
-result2 = pr_m.getRegion(poi, scale).getInfo()[:5]
+##result2 = pr_m.getRegion(poi, scale).getInfo()[:5]
+result2 = np.array(pet_m.getRegion(poi, scale).get("pet_m"), dtype=np.float).reshape((-1, 1))[:5]
+
 st.write(result2)
 
 # Combine precipitation and evapotranspiration.
@@ -545,6 +551,7 @@ meteo = pr_m.combine(pet_m)
 
 # Import meteorological data as an array at the location of interest.
 meteo_arr = meteo.getRegion(poi, scale).getInfo()
+meteo_arr = np.array(meteo.getRegion(poi, scale).get("meteo"), dtype=np.float).reshape((-1, 1))[:5]
 
 # Print the result.
 #pprint.pprint(meteo_arr[:5])
