@@ -5,6 +5,7 @@ import ee
 import geemap.colormaps as cm
 import geemap.foliumap as geemap
 import streamlit as st
+import pydeck as pdk
 
 # ______ GEE Authenthication ______
 
@@ -156,7 +157,35 @@ folium.Marker([lat, lon], popup="point of interest").add_to(my_map)
 my_map.add_child(folium.LayerControl())
 
 # Display the map.
-st.write(my_map._repr_html_())
+# Use streamlit's pydeck_chart to display the Folium map
+st.pydeck_chart(pdk.Deck(
+    map_style="mapbox://styles/mapbox/light-v9",
+    initial_view_state=pdk.ViewState(
+        latitude=lat,
+        longitude=lon,
+        zoom=11,
+        pitch=50,
+    ),
+    layers=[
+        pdk.Layer(
+            "HexagonLayer",
+            data=my_map,
+            get_position=["lon", "lat"],
+            radius=100,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            pickable=True,
+            extruded=True,
+        ),
+        pdk.Layer(
+            "ScatterplotLayer",
+            data=my_map,
+            get_position=["lon", "lat"],
+            get_color=[200, 30, 0, 160],
+            get_radius=200,
+        ),
+    ],
+))
 
 
 def local_profile(dataset, poi, buffer):
