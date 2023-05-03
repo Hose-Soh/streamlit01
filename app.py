@@ -344,10 +344,10 @@ for key in olm_bands:
 profile_wp = local_profile(wilting_point, poi, scale)
 profile_fc = local_profile(field_capacity, poi, scale)
 
-st.write("Wilting point profile:")
-st.write(profile_wp.getInfo())
+st.write("Wilting point profile: ", profile_wp)
 
-st.write("Field capacity profile:")
-st.write(profile_fc.getInfo())
+
+st.write("Field capacity profile:", profile_fc)
+
 
 
