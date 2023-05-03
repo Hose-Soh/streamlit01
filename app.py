@@ -431,29 +431,32 @@ pprint.pprint(local_pr)
 
 
 
+import numpy as np
+import pandas as pd
+
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    arr = np.array(arr)[np.newaxis, :]
-    df = pd.DataFrame(arr)
-
-    # Rearrange the header.
-    headers = df.iloc[0]
-    df = pd.DataFrame(df.values[1:], columns=headers)
+    arr = np.array(arr)
+    headers = arr[0,:]
+    data = arr[1:,:].astype(float)
 
     # Convert the data to numeric values.
     for band in list_of_bands:
-        df[band] = pd.to_numeric(df[band], errors="coerce")
+        band_idx = np.where(headers == band)[0][0]
+        data[:,band_idx] = pd.to_numeric(data[:,band_idx], errors="coerce")
 
     # Convert the time field into a datetime.
-    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
-
-    # Keep the columns of interest.
-    df = df[["time", "datetime", *list_of_bands]]
-
-    # The datetime column is defined as index.
-    df = df.set_index("datetime")
-
+    time_idx = np.where(headers == 'time')[0][0]
+    datetimes = pd.to_datetime(data[:,time_idx], unit='ms')
+    
+    # Create the DataFrame.
+    df = pd.DataFrame(data, columns=headers)
+    df['datetime'] = datetimes
+    df.set_index('datetime', inplace=True)
+    df.drop(columns=['time'], inplace=True)
+    
     return df
+
 
 pr_df = ee_array_to_df(local_pr, ["precipitation"])
 #pr_df.head(10)
