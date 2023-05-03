@@ -411,7 +411,6 @@ st.pyplot(fig)
 
 #_____________________________________________Getting Meteorological Datasets_____________________________________________
 
-
 # Import precipitation.
 pr = (
     ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
@@ -426,164 +425,157 @@ pet = (
     .filterDate(i_date, f_date)
 )
 
-
-def ee_array_to_df(arr, list_of_bands):
-    """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    df = pd.DataFrame(arr)
-
-    # Rearrange the header.
-    headers = df.iloc[0]
-    df = pd.DataFrame(df.values[1:], columns=headers)
-
-    # Convert the data to numeric values.
-    for band in list_of_bands:
-        df[band] = pd.to_numeric(df[band], errors="coerce")
-
-    # Convert the time field into a datetime.
-    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
-
-    # Keep the columns of interest.
-    df = df[["time", "datetime", *list_of_bands]]
-
-    # The datetime column is defined as index.
-    df = df.set_index("datetime")
-
-    return df
-
-def evaluate_local_pr(poi, i_date, f_date, scale):
-    pr = (
-        ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
-        .select("precipitation")
-        .filterDate(i_date, f_date)
-    )
-
-    # Evaluate local precipitation conditions.
-    local_pr = pr.getRegion(poi, scale)
-
-    # Transform the result into a pandas dataframe.
-    pr_df = ee_array_to_df(local_pr, ["precipitation"])
-    return pr_df
-
-def evaluate_local_pet(poi, scale):
-    pet = ee.ImageCollection("IDAHO_EPSCOR/TERRACLIMATE").select("pet")
-    
-    # Evaluate local potential evapotranspiration.
-    local_pet = pet.getRegion(poi, scale).getInfo()
-
-    # Transform the result into a pandas dataframe.
-    pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
-    return pet_df
+# Evaluate local precipitation conditions.
+local_pr = pr.getRegion(poi, scale)
+pprint.pprint(local_pr)
 
 
-def sum_resampler(coll, freq, unit, scale_factor, band_name):
-    """
-    This function aims to resample the time scale of an ee.ImageCollection.
-    The function returns an ee.ImageCollection with the averaged sum of the
-    band on the selected frequency.
 
-    coll: (ee.ImageCollection) only one band can be handled
-    freq: (int) corresponds to the resampling frequence
-    unit: (str) corresponds to the resampling time unit.
-                must be 'day', 'month' or 'year'
-    scale_factor (float): scaling factor used to get our value in the good unit
-    band_name (str) name of the output band
-    """
+# def ee_array_to_df(arr, list_of_bands):
+#     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
+#     df = pd.DataFrame(arr)
 
-    # Define initial and final dates of the collection.
-    firstdate = ee.Date(
-        coll.sort("system:time_start", True).first().get("system:time_start")
-    )
+#     # Rearrange the header.
+#     headers = df.iloc[0]
+#     df = pd.DataFrame(df.values[1:], columns=headers)
 
-    lastdate = ee.Date(
-        coll.sort("system:time_start", False).first().get("system:time_start")
-    )
+#     # Convert the data to numeric values.
+#     for band in list_of_bands:
+#         df[band] = pd.to_numeric(df[band], errors="coerce")
 
-    # Calculate the time difference between both dates.
-    # https://developers.google.com/earth-engine/apidocs/ee-date-difference
-    diff_dates = lastdate.difference(firstdate, unit)
+#     # Convert the time field into a datetime.
+#     df["datetime"] = pd.to_datetime(df["time"], unit="ms")
 
-    # Define a new time index (for output).
-    new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
+#     # Keep the columns of interest.
+#     df = df[["time", "datetime", *list_of_bands]]
 
-    # Define the function that will be applied to our new time index.
-    def apply_resampling(date_index):
-        # Define the starting date to take into account.
-        startdate = firstdate.advance(ee.Number(date_index), unit)
+#     # The datetime column is defined as index.
+#     df = df.set_index("datetime")
 
-        # Define the ending date to take into account according
-        # to the desired frequency.
-        enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
+#     return df
 
-        # Calculate the number of days between starting and ending days.
-        diff_days = enddate.difference(startdate, "day")
+# pr_df = ee_array_to_df(local_pr, ["precipitation"])
+# #pr_df.head(10)
 
-        # Calculate the composite image.
-        image = (
-            coll.filterDate(startdate, enddate)
-            .mean()
-            .multiply(diff_days)
-            .multiply(scale_factor)
-            .rename(band_name)
-        )
 
-        # Return the final image with the appropriate time index.
-        return image.set("system:time_start", startdate.millis())
 
-    # Map the function to the new time index.
-    res = new_index.map(apply_resampling)
 
-    # Transform the result into an ee.ImageCollection.
-    res = ee.ImageCollection(res)
+# # Evaluate local potential evapotranspiration.
+# local_pet = pet.getRegion(poi, scale)
 
-    return res
+# # Transform the result into a pandas dataframe.
+# pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
+# pet_df.head(5)
 
-# Apply the resampling function to the precipitation dataset.
-pr_m = sum_resampler(pr, 1, "month", 1, "pr")
+# def sum_resampler(coll, freq, unit, scale_factor, band_name):
+#     """
+#     This function aims to resample the time scale of an ee.ImageCollection.
+#     The function returns an ee.ImageCollection with the averaged sum of the
+#     band on the selected frequency.
 
-# Evaluate the result at the location of interest.
-pprint.pprint(pr_m.getRegion(poi, scale))
+#     coll: (ee.ImageCollection) only one band can be handled
+#     freq: (int) corresponds to the resampling frequence
+#     unit: (str) corresponds to the resampling time unit.
+#                 must be 'day', 'month' or 'year'
+#     scale_factor (float): scaling factor used to get our value in the good unit
+#     band_name (str) name of the output band
+#     """
 
-# Apply the resampling function to the PET dataset.
-pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
+#     # Define initial and final dates of the collection.
+#     firstdate = ee.Date(
+#         coll.sort("system:time_start", True).first().get("system:time_start")
+#     )
 
-# Evaluate the result at the location of interest.
-pprint.pprint(pet_m.getRegion(poi, scale))
+#     lastdate = ee.Date(
+#         coll.sort("system:time_start", False).first().get("system:time_start")
+#     )
 
-# Combine precipitation and evapotranspiration.
-meteo = pr_m.combine(pet_m)
+#     # Calculate the time difference between both dates.
+#     # https://developers.google.com/earth-engine/apidocs/ee-date-difference
+#     diff_dates = lastdate.difference(firstdate, unit)
 
-# Import meteorological data as an array at the location of interest.
-meteo_arr = meteo.getRegion(poi, scale)
+#     # Define a new time index (for output).
+#     new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
 
-# Print the result.
-pprint.pprint(meteo_arr)
+#     # Define the function that will be applied to our new time index.
+#     def apply_resampling(date_index):
+#         # Define the starting date to take into account.
+#         startdate = firstdate.advance(ee.Number(date_index), unit)
 
-# Transform the array into a pandas dataframe and sort the index.
-meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
+#         # Define the ending date to take into account according
+#         # to the desired frequency.
+#         enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
 
-# Data visualization
-fig, ax = plt.subplots(figsize=(15, 6))
+#         # Calculate the number of days between starting and ending days.
+#         diff_days = enddate.difference(startdate, "day")
 
-# Barplot associated with precipitations.
-meteo_df["pr"].plot(kind="bar", ax=ax, label="precipitation")
+#         # Calculate the composite image.
+#         image = (
+#             coll.filterDate(startdate, enddate)
+#             .mean()
+#             .multiply(diff_days)
+#             .multiply(scale_factor)
+#             .rename(band_name)
+#         )
 
-# Barplot associated with potential evapotranspiration.
-meteo_df["pet"].plot(
-    kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
-)
+#         # Return the final image with the appropriate time index.
+#         return image.set("system:time_start", startdate.millis())
 
-# Add a legend.
-ax.legend()
+#     # Map the function to the new time index.
+#     res = new_index.map(apply_resampling)
 
-# Add some x/y-labels properties.
-ax.set_ylabel("Intensity [mm]")
-ax.set_xlabel(None)
+#     # Transform the result into an ee.ImageCollection.
+#     res = ee.ImageCollection(res)
 
-# Define the date format and shape of x-labels.
-x_labels = meteo_df.index.strftime("%m-%Y")
-ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
+#     return res
 
-st.pyplot(fig)
+# # Apply the resampling function to the precipitation dataset.
+# pr_m = sum_resampler(pr, 1, "month", 1, "pr")
+
+# # Evaluate the result at the location of interest.
+# pprint.pprint(pr_m.getRegion(poi, scale))
+
+# # Apply the resampling function to the PET dataset.
+# pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
+
+# # Evaluate the result at the location of interest.
+# pprint.pprint(pet_m.getRegion(poi, scale))
+
+# # Combine precipitation and evapotranspiration.
+# meteo = pr_m.combine(pet_m)
+
+# # Import meteorological data as an array at the location of interest.
+# meteo_arr = meteo.getRegion(poi, scale)
+
+# # Print the result.
+# pprint.pprint(meteo_arr)
+
+# # Transform the array into a pandas dataframe and sort the index.
+# meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
+
+# # Data visualization
+# fig, ax = plt.subplots(figsize=(15, 6))
+
+# # Barplot associated with precipitations.
+# meteo_df["pr"].plot(kind="bar", ax=ax, label="precipitation")
+
+# # Barplot associated with potential evapotranspiration.
+# meteo_df["pet"].plot(
+#     kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
+# )
+
+# # Add a legend.
+# ax.legend()
+
+# # Add some x/y-labels properties.
+# ax.set_ylabel("Intensity [mm]")
+# ax.set_xlabel(None)
+
+# # Define the date format and shape of x-labels.
+# x_labels = meteo_df.index.strftime("%m-%Y")
+# ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
+
+# st.pyplot(fig)
 
 # #############################################################
 # #############################
