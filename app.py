@@ -58,7 +58,7 @@ import branca.colormap as cm
 
 # Define the date range slider
 i_date = st.date_input("Initial date of interest (inclusive)", min_value=datetime.strptime('1992-10-02', '%Y-%m-%d'), max_value = datetime.now())
-f_date = st.date_input("Final date of interest (exclusive)", max_value = datetime.now())
+f_date = st.date_input("Final date of interest (exclusive)", min_value=datetime.strptime('1992-10-02', '%Y-%m-%d'), max_value = datetime.now())
 
 # Take input from user for lon and lat
 lon = st.number_input("Enter the longitude", value=5.145041)
