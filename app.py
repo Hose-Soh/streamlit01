@@ -434,9 +434,18 @@ pprint.pprint(local_pr)
 import numpy as np
 import pandas as pd
 
+import numpy as np
+import pandas as pd
+
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    arr = np.array(arr)
+    if arr.ndim == 1:
+        arr = np.expand_dims(arr, axis=0)
+    elif arr.ndim != 2:
+        raise ValueError("Input array must have 2 dimensions")
+    if arr.shape[0] < 2 or arr.shape[1] < 1:
+        raise ValueError("Input array must have at least 2 rows and 1 column")
+    
     headers = arr[0,:]
     data = arr[1:,:].astype(float)
 
@@ -456,6 +465,7 @@ def ee_array_to_df(arr, list_of_bands):
     df.drop(columns=['time'], inplace=True)
     
     return df
+
 
 
 pr_df = ee_array_to_df(local_pr, ["precipitation"])
