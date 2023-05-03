@@ -411,25 +411,8 @@ st.pyplot(fig)
 
 #_____________________________________________Getting Meteorological Datasets_____________________________________________
 
-# Import precipitation.
-pr = (
-    ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
-    .select("precipitation")
-    .filterDate(i_date, f_date)
-)
-
-# Import potential evaporation PET and its quality indicator ET_QC.
-pet = (
-    ee.ImageCollection("MODIS/006/MOD16A2")
-    .select(["PET", "ET_QC"])
-    .filterDate(i_date, f_date)
-)
-
-# Evaluate local precipitation conditions.
-local_pr = pr.reduceRegion(reducer=ee.Reducer.toList(), geometry=poi, scale=scale).get("precipitation").getInfo()
-pprint.pprint(local_pr)
-
-
+import ee
+import pandas as pd
 
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
@@ -454,18 +437,30 @@ def ee_array_to_df(arr, list_of_bands):
 
     return df
 
-pr_df = ee_array_to_df(local_pr, ["precipitation"])
-#pr_df.head(10)
+def evaluate_local_pr(poi, i_date, f_date, scale):
+    pr = (
+        ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
+        .select("precipitation")
+        .filterDate(i_date, f_date)
+    )
 
+    # Evaluate local precipitation conditions.
+    local_pr = pr.getRegion(poi, scale)
 
+    # Transform the result into a pandas dataframe.
+    pr_df = ee_array_to_df(local_pr, ["precipitation"])
+    return pr_df
 
+def evaluate_local_pet(poi, scale):
+    pet = ee.ImageCollection("IDAHO_EPSCOR/TERRACLIMATE").select("pet")
+    
+    # Evaluate local potential evapotranspiration.
+    local_pet = pet.getRegion(poi, scale).getInfo()
 
-# Evaluate local potential evapotranspiration.
-local_pet = pet.getRegion(poi, scale)
+    # Transform the result into a pandas dataframe.
+    pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
+    return pet_df
 
-# Transform the result into a pandas dataframe.
-pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
-pet_df.head(5)
 
 def sum_resampler(coll, freq, unit, scale_factor, band_name):
     """
