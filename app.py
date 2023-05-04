@@ -438,7 +438,7 @@ st.pyplot(fig)
 pr = (
     ee.ImageCollection("TRMM/3B42")
     .select("precipitation")
-    .filterDate(i_date.format('YYYY-MM-dd'), f_date.format('YYYY-MM-dd'))
+    .filterDate(i_date.strftime('%Y-%m-%d'), f_date.strftime('%Y-%m-%d'))
 )
 
 
@@ -446,7 +446,7 @@ pr = (
 pet = (
     ee.ImageCollection("MODIS/006/MOD16A2")
     .select(["PET", "ET_QC"])
-    .filterDate(i_date.format('YYYY-MM-dd'), f_date.format('YYYY-MM-dd'))
+    .filterDate(i_date.strftime('%Y-%m-%d'), f_date.strftime('%Y-%m-%d'))
         )
 
 # Evaluate local precipitation conditions.
