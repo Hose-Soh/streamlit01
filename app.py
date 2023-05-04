@@ -61,19 +61,34 @@ import branca.colormap as cm
 
 #__________________________Input Parameters________________________
 
+# Create two columns
+col1, col2 = st.columns(2)
+
+# Display the first logo image in the first column with no margin
+col1.image(logo_omdena, width=100, use_column_width=False)
+
+# Display the second logo image in the second column with no margin
+col2.image(logo_nitrolytics, width=100, use_column_width=False)
+    
+    # Show the code in the sidebar
+with st.sidebar:
+    st.subheader("Code")
+    st.code("""
+    # Create two columns
+    col1, col2 = st.columns(2)
+
+    # Display the first logo image in the first column with no margin
+    col1.image(logo_omdena, width=100, use_column_width=False)
+
+    # Display the second logo image in the second column with no margin
+    col2.image(logo_nitrolytics, width=100, use_column_width=False)
+    """, language="python")
+
 st.sidebar.info('### ***Welcome***\n###### ***Soil Data*** ')
 
 form = st.sidebar.form('Input Data')
 
 with form:
-    # Create two columns
-    col1, col2 = st.columns(2)
-
-# Display the first logo image in the first column with no margin
-    col1.image(logo_omdena, width=100, use_column_width=False)
-
-# Display the second logo image in the second column with no margin
-    col2.image(logo_nitrolytics, width=100, use_column_width=False)
     
     # Define the date range slider
     # Set default dates
