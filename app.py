@@ -311,6 +311,11 @@ ax.legend(
     loc="upper center", bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=3
 )
 
+# Subheader and description for soil content visualization
+st.subheader("Comparison of Soil Content Layers at Different Depths")
+
+st.write("This visualization presents a comparison of the soil content layers, including sand, clay, and organic carbon, at various depths from the surface to 200 cm. By comparing the soil content at different depths, we can gain a better understanding of the overall health and properties of the soil in the region. The depth of the soil is a critical factor in determining how well it retains moisture and nutrients, which is essential for plant growth and agriculture.")
+
 # Display the plot using Streamlit.
 st.pyplot(fig)
 
@@ -453,6 +458,11 @@ ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9]
 ax.legend(
     loc="upper center", bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=2
 )
+
+#Adding subheader and description for hydrolic properties
+st.subheader("Hydraulic Properties of Soil at Different Depths")
+
+st.write("This visualization displays the water content of soil at the wilting point and field capacity at different depths (0, 10, 30, 60, 100, and 200 cm). Water content at the wilting point represents the minimum amount of soil water that a plant requires to avoid wilting, while water content at field capacity indicates the maximum amount of water that the soil can hold against the force of gravity. By examining these properties at different depths, we can gain insight into the water retention capacity of the soil and understand how it affects plant growth and water availability.")
 
 st.pyplot(fig)
 
