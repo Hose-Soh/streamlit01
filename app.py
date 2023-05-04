@@ -25,8 +25,13 @@ ee.Initialize(credentials)
 
 # _______________________ LAYOUT CONFIGURATION __________________________
 
-#Add Omdena & Nitrolytics logo
+# Add title to page
+st.title("Exploring Soil Content Layers through an Interactive Map")
 
+# Add subtitle to page
+st.subheader("Discover the soil content layers of sand, clay, and organic carbon in any location using our interactive map! Our map allows you to track the changes in these soil layers over time by providing input for longitude, latitude, initial date, and final date.")
+
+#Add Omdena & Nitrolytics logo
 logo_omdena = "omdena.png"
 logo_nitrolytics = "nitrolytics.png"
 
@@ -603,6 +608,7 @@ meteo_arr = meteo.getRegion(poi, scale).getInfo()
 
 # Transform the array into a pandas dataframe and sort the index.
 meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
+
 
 # Display the DataFrame
 st.write(meteo_df)
