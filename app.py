@@ -30,7 +30,7 @@ logo_omdena = "omdena.png"
 
 st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 
-logo_image = st.beta_columns(2)[0].image(logo_omdena, width=100)
+logo_image = st.columns(2)[0].image(logo_omdena, width=100)
 
 # shape the map
 st.markdown(
