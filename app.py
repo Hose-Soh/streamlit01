@@ -450,7 +450,8 @@ pet = (
         )
 
 # Evaluate local precipitation conditions.
-local_pr = pr.reduceRegion(reducer=ee.Reducer.toList(), geometry=poi, scale=100)
+local_pr = pr.getRegion(poi, scale).getInfo()
+local_pr = np.array(list(local_pr.values())).T
 ##pprint.pprint(local_pr[:5])
 
 def ee_array_to_df(arr, list_of_bands):
@@ -461,21 +462,21 @@ def ee_array_to_df(arr, list_of_bands):
     headers = df.iloc[0]
     df = pd.DataFrame(df.values[1:], columns=headers)
 
-    # Remove rows without data inside.
-    df = df[['longitude', 'latitude', 'time', *list_of_bands]].dropna()
-
     # Convert the data to numeric values.
     for band in list_of_bands:
-        df[band] = pd.to_numeric(df[band], errors='coerce')
+        df[band] = pd.to_numeric(df[band], errors="coerce")
 
     # Convert the time field into a datetime.
-    df['datetime'] = pd.to_datetime(df['time'], unit='ms')
+    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
+
     # Keep the columns of interest.
-    df = df[['datetime', "longitude", "latitude", *list_of_bands]]
+    df = df[["time", "datetime", *list_of_bands]]
+
+    # The datetime column is defined as index.
+    df = df.set_index("datetime")
 
     return df
 
-    return df
 
 pr_df = ee_array_to_df(local_pr, ["precipitation"])
 
