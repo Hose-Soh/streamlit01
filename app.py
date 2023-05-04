@@ -454,30 +454,22 @@ local_pr = pr.getRegion(geometry=poi,
   scale=scale)
 ##pprint.pprint(local_pr[:5])
 
-def ee_array_to_df(arr, list_of_bands):
-    """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    df = pd.DataFrame(arr)
+# Convert local_pr to a Pandas DataFrame
+pr_df = pd.DataFrame(local_pr[1:], columns=local_pr[0])
 
-    # Rearrange the header.
-    headers = df.iloc[0]
-    df = pd.DataFrame(df.values[1:], columns=headers)
+# Convert the 'time' column to a datetime object
+pr_df['time'] = pd.to_datetime(pr_df['time'], unit='ms')
 
-    # Convert the data to numeric values.
-    # for band in list_of_bands:
-    #     df[band] = pd.to_numeric(df[band], errors="coerce")
+# Set the 'time' column as the DataFrame index
+pr_df.set_index('time', inplace=True)
 
-    # Convert the time field into a datetime.
-    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
+# Convert the precipitation column to float
+pr_df['precipitation'] = pr_df['precipitation'].astype(float)
 
-    # Keep the columns of interest.
-    df = df[["time", "datetime", *list_of_bands]]
+# Print the resulting DataFrame
+#print(df)
 
-    # The datetime column is defined as index.
-    df = df.set_index("datetime")
-
-    return df
-
-pr_df = ee_array_to_df(local_pr, ["precipitation"])
+#pr_df = ee_array_to_df(local_pr, ["precipitation"])
 #pr_df.head(10)
 
 
