@@ -439,6 +439,7 @@ pr = (
     ee.ImageCollection("TRMM/3B42")
     .select("precipitation")
     .filterDate(i_date, f_date)
+    .filterBounds(poi)
 )
 
 
@@ -449,25 +450,18 @@ pet = (
     .filterDate(i_date.strftime('%Y-%m-%d'), f_date.strftime('%Y-%m-%d'))
     )
 
-# Evaluate local precipitation conditions.
-local_pr = pr.getRegion(geometry=poi, scale=scale)
-##pprint.pprint(local_pr[:5])
+def extract_pr(image):
+    # Get the timestamp of the image
+    time = ee.Date(image.get('system:time_start')).format('YYYY-MM-dd HH:mm:ss').getInfo()
+    # Get the precipitation value
+    precipitation = image.get('precipitation').getInfo()
+    # Create a dictionary with the data
+    data = {'time': time, 'precipitation': precipitation}
+    return data
 
-# Get the column names from the first row of the list
-column_names = ['time', 'precipitation']
 
-# Create the DataFrame using all rows except the first (which contains column names)
+local_pr = pr.map(extract_pr).getInfo()
 pr_df = pd.DataFrame(local_pr)
-
-# Convert the 'time' column to a datetime object
-pr_df['time'] = pd.to_datetime(pr_df['time'], unit='ms')
-
-# Set the 'time' column as the DataFrame index
-pr_df.set_index('time', inplace=True)
-
-# Convert the precipitation column to float
-pr_df['precipitation'] = pr_df['precipitation'].astype(float)
-
 # Print the resulting DataFrame
 #print(df)
 
