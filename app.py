@@ -24,6 +24,11 @@ credentials = ee.ServiceAccountCredentials(service_account, key_data=json_object
 ee.Initialize(credentials)
 
 # _______________________ LAYOUT CONFIGURATION __________________________
+#Add Omdena & Nitrolytics logo
+logo_omdena = "omdena.png"
+logo_nitrolytics = "nitrolytics.png"
+
+st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 
 # Add title to page
 st.title("Exploring Soil Content Layers through an Interactive Map")
@@ -31,11 +36,9 @@ st.title("Exploring Soil Content Layers through an Interactive Map")
 # Add subtitle to page
 st.subheader("Discover the soil content layers of sand, clay, and organic carbon in any location using our interactive map! Our map allows you to track the changes in these soil layers over time by providing input for longitude, latitude, initial date, and final date.")
 
-#Add Omdena & Nitrolytics logo
-logo_omdena = "omdena.png"
-logo_nitrolytics = "nitrolytics.png"
 
-st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
+
+
 
 
 # shape the map
