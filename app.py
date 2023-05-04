@@ -605,7 +605,7 @@ meteo_arr = meteo.getRegion(poi, scale).getInfo()
 meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
 
 # Add a download button to download the CSV file
-csv = meteo_df.to_csv(index=False)
+csv = meteo_df.to_csv(index=True)
 b64 = base64.b64encode(csv.encode()).decode() # encode as CSV string
 href = f'<a href="data:file/csv;base64,{b64}" download="meteo_data.csv">Download Meteorological Data</a>'
 st.markdown(href, unsafe_allow_html=True)
