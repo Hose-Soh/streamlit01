@@ -453,8 +453,11 @@ pet = (
 local_pr = pr.getRegion(geometry=poi, scale=scale)
 ##pprint.pprint(local_pr[:5])
 
-# Convert local_pr to a Pandas DataFrame
-pr_df = pd.DataFrame(local_pr[1:], columns=local_pr[0])
+# Get the column names from the first row of the list
+column_names = ['time', 'precipitation']
+
+# Create the DataFrame using all rows except the first (which contains column names)
+pr_df = pd.DataFrame(local_pr, columns=column_names)
 
 # Convert the 'time' column to a datetime object
 pr_df['time'] = pd.to_datetime(pr_df['time'], unit='ms')
