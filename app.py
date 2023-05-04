@@ -202,7 +202,7 @@ my_map.add_child(folium.LayerControl())
 my_map.addLayerControl()
 
 #Header for map
-st.subheader("Soil Content Layer")
+st.subheader("Google Earth Map")
 
 # Display the map.
 my_map.to_streamlit(height=600,  responsive=True, scrolling=False)
