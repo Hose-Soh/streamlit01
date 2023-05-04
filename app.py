@@ -890,15 +890,15 @@ fig, ax = plt.subplots(figsize=(15, 6))
 ax.set_title("Comparison of Precipitation, Potential Evapotranspiration, Groundwater Recharge", fontsize=14)
 
 # Barplot associated with precipitation.
-rdf["pr"].plot(kind="bar", ax=ax, label="precipitation", alpha=0.5)
+rdf["pr"].plot(kind="line", ax=ax, label="precipitation", alpha=0.5)
 
 # Barplot associated with potential evapotranspiration.
 rdf["pet"].plot(
-    kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.2
+    kind="line", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.2
 )
 
 # Barplot associated with groundwater recharge
-rdf["rech"].plot(kind="bar", ax=ax, label="recharge", color="green", alpha=1)
+rdf["rech"].plot(kind="line", ax=ax, label="recharge", color="green", alpha=1)
 
 # Add a legend.
 ax.legend()
