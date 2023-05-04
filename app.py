@@ -34,11 +34,23 @@ st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 # Create two columns
 col1, col2 = st.columns(2)
 
-# Display the first logo image in the first column with no margin
-col1.image(logo_omdena, width=100, use_column_width=False, margin=0)
+# Apply custom CSS to the second column to remove padding
+col2.markdown(
+    f"""
+    <style>
+    .reportview-container .main .block-container {{
+        padding-top: 0rem;
+        padding-right: 0rem;
+        padding-left: 0rem;
+        padding-bottom: 0rem;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# Display the second logo image in the second column with no margin
-col2.image(logo_nitrolytics, width=100, use_column_width=False, margin=0)
+# Display the second logo image in the second column with no padding
+col2.image(logo_nitrolytics, width=100, use_column_width=False, output_format='PNG')
 
 # shape the map
 st.markdown(
