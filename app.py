@@ -438,8 +438,7 @@ st.pyplot(fig)
 pr = (
     ee.ImageCollection("TRMM/3B42")
     .select("precipitation")
-    .filterDate(i_date, f_date)
-    .filterBounds(poi)
+    .filterDate(i_date.format('YYYY-MM-dd'), f_date.format('YYYY-MM-dd'))
 )
 
 
@@ -447,21 +446,40 @@ pr = (
 pet = (
     ee.ImageCollection("MODIS/006/MOD16A2")
     .select(["PET", "ET_QC"])
-    .filterDate(i_date.strftime('%Y-%m-%d'), f_date.strftime('%Y-%m-%d'))
-    )
+    .filterDate(i_date.format('YYYY-MM-dd'), f_date.format('YYYY-MM-dd'))
+        )
 
-def extract_pr(image):
-    # Get the timestamp of the image
-    time = ee.Date(image.get('system:time_start')).format('YYYY-MM-dd HH:mm:ss').getInfo()
-    # Get the precipitation value
-    precipitation = image.get('precipitation').getInfo()
-    # Create a dictionary with the data
-    data = {'time': time, 'precipitation': precipitation}
-    return data
+# Evaluate local precipitation conditions.
+local_pr = pr.reduceRegion(reducer=ee.Reducer.toList(), geometry=poi, scale=100)
+##pprint.pprint(local_pr[:5])
+
+def ee_array_to_df(arr, list_of_bands):
+    """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
+    df = pd.DataFrame(arr)
+
+    # Rearrange the header.
+    headers = df.iloc[0]
+    df = pd.DataFrame(df.values[1:], columns=headers)
+
+    # Remove rows without data inside.
+    df = df[['longitude', 'latitude', 'time', *list_of_bands]].dropna()
+
+    # Convert the data to numeric values.
+    for band in list_of_bands:
+        df[band] = pd.to_numeric(df[band], errors='coerce')
+
+    # Convert the time field into a datetime.
+    df['datetime'] = pd.to_datetime(df['time'], unit='ms')
+    # Keep the columns of interest.
+    df = df[['datetime', "longitude", "latitude", *list_of_bands]]
+
+    return df
+
+    return df
+
+pr_df = ee_array_to_df(local_pr, ["precipitation"])
 
 
-local_pr = pr.map(extract_pr).getInfo()
-pr_df = pd.DataFrame(local_pr)
 # Print the resulting DataFrame
 #print(df)
 
