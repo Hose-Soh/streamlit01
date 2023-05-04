@@ -5,6 +5,7 @@ import ee
 import geemap.colormaps as cm
 import geemap.foliumap as geemap
 import streamlit as st
+import base64
 
 # ______ GEE Authenthication ______
 
@@ -29,7 +30,7 @@ ee.Initialize(credentials)
 logo_omdena = "omdena.png"
 logo_nitrolytics = "nitrolytics.png"
 
-st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
+st.set_page_config(page_title="Soil Data Exploration", layout="wide", page_icon=logo_omdena)
 
 
 # shape the map
@@ -603,6 +604,15 @@ meteo_arr = meteo.getRegion(poi, scale).getInfo()
 # Transform the array into a pandas dataframe and sort the index.
 meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
 
+# Add a download button to download the CSV file
+csv = meteo_df.to_csv(index=False)
+b64 = base64.b64encode(csv.encode()).decode() # encode as CSV string
+href = f'<a href="data:file/csv;base64,{b64}" download="meteo_data.csv">Download Meteorological Data</a>'
+st.markdown(href, unsafe_allow_html=True)
+
+# Display the DataFrame
+st.write(meteo_df)
+
 # Data visualization
 fig, ax = plt.subplots(figsize=(15, 6))
 
@@ -854,4 +864,125 @@ st.write(
 )
 
 
+#___________________________________Groundwater recharge comparison between multiple places_________________________________________
+
+def get_local_recharge(i_date, f_date, lon, lat, scale):
+    """
+    Returns a pandas df describing the cumulative groundwater
+    recharge by month
+    """
+    # Define the location of interest with a point.
+    poi = ee.Geometry.Point(lon, lat)
+
+    # Evaluate the recharge around the location of interest.
+    rarr = rech_coll.filterDate(i_date, f_date).getRegion(poi, scale).getInfo()
+
+    # Transform the result into a pandas dataframe.
+    rdf = ee_array_to_df(rarr, ["pr", "pet", "apwl", "st", "rech"]).sort_index()
+    return rdf
+
+# Define the second location of interest by longitude/latitude.
+lon2 = 4.137152
+lat2 = 43.626945
+
+# Calculate the local recharge condition at this location.
+rdf2 = get_local_recharge(i_date, f_date, lon2, lat2, scale)
+
+# Resample the resulting pandas dataframe on a yearly basis (sum by year).
+rdf2y = rdf2.resample("Y").sum()
+rdf2y.head()
+
+# Data Visualization
+fig, ax = plt.subplots(figsize=(15, 6))
+ax.axes.get_yaxis().set_visible(False)
+
+# Define the x-label locations.
+x = np.arange(len(rdfy))
+
+# Define the bar width.
+width = 0.25
+
+# Bar plot associated to groundwater recharge at the 1st location of interest.
+rect1 = ax.bar(
+    x - width / 2, rdfy.rech, width, label="Lyon (France)", color="blue", alpha=0.5
+)
+
+# Bar plot associated to groundwater recharge at the 2nd location of interest.
+rect2 = ax.bar(
+    x + width / 2,
+    rdf2y.rech,
+    width,
+    label="Montpellier (France)",
+    color="red",
+    alpha=0.5,
+)
+
+# Define a function to attach a label to each bar.
+def autolabel_recharge(rects):
+    """Attach a text label above each bar in *rects*, displaying its height."""
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate(
+            "{}".format(int(height)) + " mm",
+            xy=(rect.get_x() + rect.get_width() / 2, height),
+            xytext=(0, 3),  # 3 points vertical offset
+            textcoords="offset points",
+            ha="center",
+            va="bottom",
+            fontsize=8,
+        )
+
+autolabel_recharge(rect1)
+autolabel_recharge(rect2)
+
+# Calculate the averaged annual recharge at both locations of interest.
+place1mean = int(rdfy["rech"].mean())
+place2mean = int(rdf2y["rech"].mean())
+
+# Add an horizontal line associated with averaged annual values (location 1).
+ax.hlines(
+    place1mean,
+    xmin=min(x) - width,
+    xmax=max(x) + width,
+    color="blue",
+    lw=0.5,
+    label="average " + str(place1mean) + " mm/y",
+    alpha=0.5,
+)
+
+# Add an horizontal line associated with averaged annual values (location 2).
+ax.hlines(
+    place2mean,
+    xmin=min(x) - width,
+    xmax=max(x) + width,
+    color="red",
+    lw=0.5,
+    label="average " + str(place2mean) + " mm/y",
+    alpha=0.5,
+)
+
+# Add a title.
+ax.set_title("Groundwater recharge comparison between two places", fontsize=12)
+
+# Define some x/y-axis properties.
+ax.set_xticks(x)
+x_labels = rdfy.index.year.tolist()
+ax.set_xticklabels(x_labels, rotation=45, fontsize=
+
+10)
+
+ax.spines["left"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.spines["top"].set_visible(False)
+
+# Shrink current axis's height by 10% on the bottom.
+box = ax.get_position()
+ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+
+# Add a legend below current axis.
+ax.legend(
+    loc="upper center", bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=2
+)
+
+plt.show()
 
