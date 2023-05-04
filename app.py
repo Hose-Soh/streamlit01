@@ -455,7 +455,7 @@ local_pr = pr.getRegion(geometry=poi,
 ##pprint.pprint(local_pr[:5])
 
 # Convert local_pr to a Pandas DataFrame
-pr_df = pd.DataFrame(local_pr[1:], columns=local_pr[0])
+pr_df = pd.DataFrame(local_pr[1:, :], columns=local_pr[0])
 
 # Convert the 'time' column to a datetime object
 pr_df['time'] = pd.to_datetime(pr_df['time'], unit='ms')
