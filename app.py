@@ -31,10 +31,10 @@ logo_nitrolytics = "nitrolytics.png"
 st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 
 # Add title to page
-st.title("Exploring Soil Content Layers through an Interactive Map")
+st.title("Exploring Soil Characteristics and Hydrological Properties of a Region: Soil Content, Potential Evapotranspiration, Recharge, Perched Water Level, Precipitation, and Soil Moisture")
 
 # Add subtitle to page
-st.subheader("Discover the soil content layers of sand, clay, and organic carbon in any location using our interactive map! Our map allows you to track the changes in these soil layers over time by providing input for longitude, latitude, initial date, and final date.")
+st.subheader("Discover Soil Content, Water Content, Potential Evapotranspiration, Recharge, Perched Water Level, Precipitation, and Soil Moisture! Enter longitude, latitude, initial date, and final date.")
 
 
 
