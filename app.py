@@ -454,9 +454,9 @@ st.pyplot(fig)
 #     .filterDate(i_date, f_date)
 # )
 
-# Import precipitation from TRMM dataset.
+# Import precipitation 
 pr = (
-    ee.ImageCollection("TRMM/3B42")
+    ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
     .select("precipitation")
     .filterDate(i_date.strftime('%Y-%m-%d'), f_date.strftime('%Y-%m-%d'))
 )
