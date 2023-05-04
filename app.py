@@ -650,11 +650,11 @@ fig, ax = plt.subplots(figsize=(15, 6))
 ax.set_title("Comparison of Precipitation and Potential Evapotranspiration", fontsize=14)
 
 # Barplot associated with precipitations.
-meteo_df["pr"].plot(kind="bar", ax=ax, label="precipitation")
+meteo_df["pr"].plot(kind="line", ax=ax, label="precipitation")
 
 # Barplot associated with potential evapotranspiration.
 meteo_df["pet"].plot(
-    kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
+    kind="line", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
 )
 
 # Add a legend.
