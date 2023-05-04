@@ -630,8 +630,8 @@ st.subheader("Precipitation and Potential Evapotranspiration Data for Region of 
 
 st.write("This section displays a dataframe of precipitation and potential evapotranspiration data for a selected region of interest within a given time frame. The data is presented in columns, with each column representing a specific variable related to the water cycle.")
 # Add a description of the columns
-st.write("\"PR\" represents Precipitation, which refers to the amount of water that falls to the ground in the form of rain, snow, sleet, or hail.")
-st.write("\"PET\" represents Potential Evapotranspiration, which is the amount of water that would evaporate and transpire from an area if it had an unlimited supply of water. It is a measure of the atmospheric demand for water.")
+st.write("-PR represents Precipitation, which refers to the amount of water that falls to the ground in the form of rain, snow, sleet, or hail.")
+st.write("-PET represents Potential Evapotranspiration, which is the amount of water that would evaporate and transpire from an area if it had an unlimited supply of water. It is a measure of the atmospheric demand for water.")
 # Display the DataFrame
 st.write(meteo_df)
 
