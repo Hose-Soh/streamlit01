@@ -490,7 +490,7 @@ def ee_array_to_df(arr, list_of_bands):
         df[band] = pd.to_numeric(df[band], errors="coerce")
 
     # Convert the time field into a datetime.
-    df["datetime"] = pd.to_datetime(df["time"], unit="ms")
+    df["datetime"] = pd.to_datetime(df["time"])
 
     # Keep the columns of interest.
     df = df[["time", "datetime", *list_of_bands]]
