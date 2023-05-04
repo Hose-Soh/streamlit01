@@ -451,7 +451,19 @@ pet = (
 
 # Evaluate local precipitation conditions.
 local_pr = pr.getRegion(poi, scale).getInfo()
-local_pr = np.array(list(local_pr.values())).T
+
+# Split string into rows
+rows = local_pr.strip().split('\n')
+
+# Split rows into columns and convert to float
+local_pr_arr = []
+for row in rows[1:]:
+    columns = row.split(',')
+    local_pr_arr.append([float(columns[3]), float(columns[4])])
+
+local_pr = local_pr_arr
+
+
 ##pprint.pprint(local_pr[:5])
 
 def ee_array_to_df(arr, list_of_bands):
