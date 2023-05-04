@@ -491,12 +491,12 @@ def ee_array_to_df(arr, list_of_bands):
 
     # Convert the time field into a datetime.
     df["datetime"] = pd.to_datetime(df["time"], unit="ms")
-
+    df["Datetime"] = df["datetime"]
     # Keep the columns of interest.
-    df = df[["time", "datetime", *list_of_bands]]
+    df = df[["Datetime", "time", "datetime", *list_of_bands]]
 
     # The datetime column is defined as index.
-    #df = df.set_index("datetime")
+    df = df.set_index("datetime")
 
     return df
 
@@ -635,7 +635,7 @@ ax.set_ylabel("Intensity [mm]")
 ax.set_xlabel(None)
 
 # Define the date format and shape of x-labels.
-x_labels = meteo_df.index.strftime("%m-%Y-%d")
+x_labels = meteo_df.index.strftime("%m-%Y")
 ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
 
 st.pyplot(fig)
