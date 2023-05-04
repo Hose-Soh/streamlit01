@@ -24,13 +24,7 @@ ee.Initialize(credentials)
 
 # _______________________ LAYOUT CONFIGURATION __________________________
 
-#Add Omdena & Nitrolytics logo
 
-logo_omdena = "omdena.png"
-
-st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
-
-logo_image = st.beta_columns(2)[0].image(logo_omdena, width=100)
 
 # shape the map
 st.markdown(
@@ -66,7 +60,13 @@ st.sidebar.info('### ***Welcome***\n###### ***Soil Data*** ')
 form = st.sidebar.form('Input Data')
 
 with form:
-    
+    #Add Omdena & Nitrolytics logo
+
+    logo_omdena = "omdena.png"
+
+    st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
+
+    logo_image = st.beta_columns(2)[0].image(logo_omdena, width=100)
     
     # Define the date range slider
     # Set default dates
