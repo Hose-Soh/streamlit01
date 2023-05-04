@@ -457,7 +457,7 @@ local_pr = pr.getRegion(geometry=poi, scale=scale)
 column_names = ['time', 'precipitation']
 
 # Create the DataFrame using all rows except the first (which contains column names)
-pr_df = pd.DataFrame(local_pr, columns=column_names)
+pr_df = pd.DataFrame(local_pr)
 
 # Convert the 'time' column to a datetime object
 pr_df['time'] = pd.to_datetime(pr_df['time'], unit='ms')
