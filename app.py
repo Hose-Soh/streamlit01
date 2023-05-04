@@ -60,6 +60,14 @@ st.sidebar.info('### ***Welcome***\n###### ***Soil Data*** ')
 form = st.sidebar.form('Input Data')
 
 with form:
+    #Add Omdena & Nitrolytics logo
+
+    logo_omdena = "omdena.png"
+
+    st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
+
+    logo_image = st.beta_columns(2)[0].image(logo_omdena, width=100)
+    
     # Define the date range slider
     # Set default dates
     default_i_date = datetime(2015, 1, 1)
@@ -193,7 +201,7 @@ def local_profile(dataset, poi, buffer):
 profile_sand = local_profile(sand, poi, scale)
 
 # Print the result.
-st.write("Sand content profile at the location of interest:\n", profile_sand)
+#st.write("Sand content profile at the location of interest:\n", profile_sand)
 
 # Clay and organic content profiles.
 profile_clay = local_profile(clay, poi, scale)
@@ -292,7 +300,7 @@ orgm = orgc.multiply(1.724)
 profile_orgm = local_profile(orgm, poi, scale)
 
 #Print the organic matter content profile.
-st.write("Organic Matter content profile at the location of interest: ", profile_orgm)
+#st.write("Organic Matter content profile at the location of interest: ", profile_orgm)
 ##st.write(.getInfo())
 
 #Initialization of two constant images for wilting point and field capacity.
@@ -362,8 +370,8 @@ for key in olm_bands:
 profile_wp = local_profile(wilting_point, poi, scale)
 profile_fc = local_profile(field_capacity, poi, scale)
 
-st.write("Wilting point profile: ", profile_wp)
-st.write("Field capacity profile:", profile_fc)
+#st.write("Wilting point profile: ", profile_wp)
+#st.write("Field capacity profile:", profile_fc)
 
 #_________________________________________Hydraulic Properties Visualization__________________________________________________
 
@@ -495,7 +503,7 @@ local_pet = pet.getRegion(poi, scale).getInfo()
 
 # Transform the result into a pandas dataframe.
 pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
-pet_df.head(5)
+#pet_df.head(5)
 
 def sum_resampler(coll, freq, unit, scale_factor, band_name):
     """
@@ -563,13 +571,13 @@ def sum_resampler(coll, freq, unit, scale_factor, band_name):
 pr_m = sum_resampler(pr, 1, "month", 1, "pr")
 
 # Evaluate the result at the location of interest.
-pprint.pprint(pr_m.getRegion(poi, scale).getInfo()[:5])
+#pprint.pprint(pr_m.getRegion(poi, scale).getInfo()[:5])
 
 # Apply the resampling function to the PET dataset.
 pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
 
 # Evaluate the result at the location of interest.
-pprint.pprint(pet_m.getRegion(poi, scale).getInfo()[:5])
+#pprint.pprint(pet_m.getRegion(poi, scale).getInfo()[:5])
 
 # Combine precipitation and evapotranspiration.
 meteo = pr_m.combine(pet_m)
@@ -578,7 +586,7 @@ meteo = pr_m.combine(pet_m)
 meteo_arr = meteo.getRegion(poi, scale).getInfo()
 
 # Print the result.
-pprint.pprint(meteo_arr[:5])
+#pprint.pprint(meteo_arr[:5])
 
 # Transform the array into a pandas dataframe and sort the index.
 meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
