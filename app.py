@@ -457,12 +457,8 @@ local_pr = pr.getRegion(poi, scale).getInfo()
 
 def ee_array_to_df(arr, list_of_bands):
     """Transforms client-side ee.Image.getRegion array to pandas.DataFrame."""
-    data1 = json.load(arr)
-
-    #converting it into dataframe
-    df = pd.read_json(data1, orient ='index')
-
-    #df = pd.DataFrame(arr)
+    arr = np.array(arr) # convert list to numpy array
+    df = pd.DataFrame(arr)
 
     # Rearrange the header.
     headers = df.iloc[0]
