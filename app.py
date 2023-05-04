@@ -490,122 +490,122 @@ pr_df = ee_array_to_df(local_pr, ["precipitation"])
 #pr_df.head(10)
 
 
-# # Evaluate local potential evapotranspiration.
-# local_pet = pet.getRegion(poi, scale).getInfo()
+# Evaluate local potential evapotranspiration.
+local_pet = pet.getRegion(poi, scale).getInfo()
 
-# # Transform the result into a pandas dataframe.
-# pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
-# pet_df.head(5)
+# Transform the result into a pandas dataframe.
+pet_df = ee_array_to_df(local_pet, ["PET", "ET_QC"])
+pet_df.head(5)
 
-# def sum_resampler(coll, freq, unit, scale_factor, band_name):
-#     """
-#     This function aims to resample the time scale of an ee.ImageCollection.
-#     The function returns an ee.ImageCollection with the averaged sum of the
-#     band on the selected frequency.
+def sum_resampler(coll, freq, unit, scale_factor, band_name):
+    """
+    This function aims to resample the time scale of an ee.ImageCollection.
+    The function returns an ee.ImageCollection with the averaged sum of the
+    band on the selected frequency.
 
-#     coll: (ee.ImageCollection) only one band can be handled
-#     freq: (int) corresponds to the resampling frequence
-#     unit: (str) corresponds to the resampling time unit.
-#                 must be 'day', 'month' or 'year'
-#     scale_factor (float): scaling factor used to get our value in the good unit
-#     band_name (str) name of the output band
-#     """
+    coll: (ee.ImageCollection) only one band can be handled
+    freq: (int) corresponds to the resampling frequence
+    unit: (str) corresponds to the resampling time unit.
+                must be 'day', 'month' or 'year'
+    scale_factor (float): scaling factor used to get our value in the good unit
+    band_name (str) name of the output band
+    """
 
-#     # Define initial and final dates of the collection.
-#     firstdate = ee.Date(
-#         coll.sort("system:time_start", True).first().get("system:time_start")
-#     )
+    # Define initial and final dates of the collection.
+    firstdate = ee.Date(
+        coll.sort("system:time_start", True).first().get("system:time_start")
+    )
 
-#     lastdate = ee.Date(
-#         coll.sort("system:time_start", False).first().get("system:time_start")
-#     )
+    lastdate = ee.Date(
+        coll.sort("system:time_start", False).first().get("system:time_start")
+    )
 
-#     # Calculate the time difference between both dates.
-#     # https://developers.google.com/earth-engine/apidocs/ee-date-difference
-#     diff_dates = lastdate.difference(firstdate, unit)
+    # Calculate the time difference between both dates.
+    # https://developers.google.com/earth-engine/apidocs/ee-date-difference
+    diff_dates = lastdate.difference(firstdate, unit)
 
-#     # Define a new time index (for output).
-#     new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
+    # Define a new time index (for output).
+    new_index = ee.List.sequence(0, ee.Number(diff_dates), freq)
 
-#     # Define the function that will be applied to our new time index.
-#     def apply_resampling(date_index):
-#         # Define the starting date to take into account.
-#         startdate = firstdate.advance(ee.Number(date_index), unit)
+    # Define the function that will be applied to our new time index.
+    def apply_resampling(date_index):
+        # Define the starting date to take into account.
+        startdate = firstdate.advance(ee.Number(date_index), unit)
 
-#         # Define the ending date to take into account according
-#         # to the desired frequency.
-#         enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
+        # Define the ending date to take into account according
+        # to the desired frequency.
+        enddate = firstdate.advance(ee.Number(date_index).add(freq), unit)
 
-#         # Calculate the number of days between starting and ending days.
-#         diff_days = enddate.difference(startdate, "day")
+        # Calculate the number of days between starting and ending days.
+        diff_days = enddate.difference(startdate, "day")
 
-#         # Calculate the composite image.
-#         image = (
-#             coll.filterDate(startdate, enddate)
-#             .mean()
-#             .multiply(diff_days)
-#             .multiply(scale_factor)
-#             .rename(band_name)
-#         )
+        # Calculate the composite image.
+        image = (
+            coll.filterDate(startdate, enddate)
+            .mean()
+            .multiply(diff_days)
+            .multiply(scale_factor)
+            .rename(band_name)
+        )
 
-#         # Return the final image with the appropriate time index.
-#         return image.set("system:time_start", startdate.millis())
+        # Return the final image with the appropriate time index.
+        return image.set("system:time_start", startdate.millis())
 
-#     # Map the function to the new time index.
-#     res = new_index.map(apply_resampling)
+    # Map the function to the new time index.
+    res = new_index.map(apply_resampling)
 
-#     # Transform the result into an ee.ImageCollection.
-#     res = ee.ImageCollection(res)
+    # Transform the result into an ee.ImageCollection.
+    res = ee.ImageCollection(res)
 
-#     return res
+    return res
 
-# # Apply the resampling function to the precipitation dataset.
-# pr_m = sum_resampler(pr, 1, "month", 1, "pr")
+# Apply the resampling function to the precipitation dataset.
+pr_m = sum_resampler(pr, 1, "month", 1, "pr")
 
-# # Evaluate the result at the location of interest.
-# pprint.pprint(pr_m.getRegion(poi, scale).getInfo()[:5])
+# Evaluate the result at the location of interest.
+pprint.pprint(pr_m.getRegion(poi, scale).getInfo()[:5])
 
-# # Apply the resampling function to the PET dataset.
-# pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
+# Apply the resampling function to the PET dataset.
+pet_m = sum_resampler(pet.select("PET"), 1, "month", 0.0125, "pet")
 
-# # Evaluate the result at the location of interest.
-# pprint.pprint(pet_m.getRegion(poi, scale).getInfo()[:5])
+# Evaluate the result at the location of interest.
+pprint.pprint(pet_m.getRegion(poi, scale).getInfo()[:5])
 
-# # Combine precipitation and evapotranspiration.
-# meteo = pr_m.combine(pet_m)
+# Combine precipitation and evapotranspiration.
+meteo = pr_m.combine(pet_m)
 
-# # Import meteorological data as an array at the location of interest.
-# meteo_arr = meteo.getRegion(poi, scale).getInfo()
+# Import meteorological data as an array at the location of interest.
+meteo_arr = meteo.getRegion(poi, scale).getInfo()
 
-# # Print the result.
-# pprint.pprint(meteo_arr[:5])
+# Print the result.
+pprint.pprint(meteo_arr[:5])
 
-# # Transform the array into a pandas dataframe and sort the index.
-# meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
+# Transform the array into a pandas dataframe and sort the index.
+meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
 
-# # Data visualization
-# fig, ax = plt.subplots(figsize=(15, 6))
+# Data visualization
+fig, ax = plt.subplots(figsize=(15, 6))
 
-# # Barplot associated with precipitations.
-# meteo_df["pr"].plot(kind="bar", ax=ax, label="precipitation")
+# Barplot associated with precipitations.
+meteo_df["pr"].plot(kind="bar", ax=ax, label="precipitation")
 
-# # Barplot associated with potential evapotranspiration.
-# meteo_df["pet"].plot(
-#     kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
-# )
+# Barplot associated with potential evapotranspiration.
+meteo_df["pet"].plot(
+    kind="bar", ax=ax, label="potential evapotranspiration", color="orange", alpha=0.5
+)
 
-# # Add a legend.
-# ax.legend()
+# Add a legend.
+ax.legend()
 
-# # Add some x/y-labels properties.
-# ax.set_ylabel("Intensity [mm]")
-# ax.set_xlabel(None)
+# Add some x/y-labels properties.
+ax.set_ylabel("Intensity [mm]")
+ax.set_xlabel(None)
 
-# # Define the date format and shape of x-labels.
-# x_labels = meteo_df.index.strftime("%m-%Y")
-# ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
+# Define the date format and shape of x-labels.
+x_labels = meteo_df.index.strftime("%m-%Y")
+ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
 
-# st.pyplot(fig)
+st.pyplot(fig)
 
 # #############################################################
 # #############################
