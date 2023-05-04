@@ -34,11 +34,11 @@ st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 # Create two columns
 col1, col2 = st.columns(2)
 
-# Display the first logo image in the first column
-col1.image(logo_omdena, width=100)
+# Display the first logo image in the first column with no margin
+col1.image(logo_omdena, width=100, use_column_width=False, margin=0)
 
-# Display the second logo image in the second column
-col2.image(logo_nitrolytics, width=100)
+# Display the second logo image in the second column with no margin
+col2.image(logo_nitrolytics, width=100, use_column_width=False, margin=0)
 
 # shape the map
 st.markdown(
