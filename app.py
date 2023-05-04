@@ -604,14 +604,16 @@ meteo_arr = meteo.getRegion(poi, scale).getInfo()
 # Transform the array into a pandas dataframe and sort the index.
 meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
 
+# Display the DataFrame
+st.write(meteo_df)
+
 # Add a download button to download the CSV file
 csv = meteo_df.to_csv(index=True)
 b64 = base64.b64encode(csv.encode()).decode() # encode as CSV string
 href = f'<a href="data:file/csv;base64,{b64}" download="meteo_data.csv">Download Meteorological Data</a>'
 st.markdown(href, unsafe_allow_html=True)
 
-# Display the DataFrame
-st.write(meteo_df)
+
 
 # Data visualization
 fig, ax = plt.subplots(figsize=(15, 6))
@@ -828,11 +830,16 @@ arr = rech_coll.getRegion(poi, scale).getInfo()
 rdf = ee_array_to_df(arr, ["pr", "pet", "apwl", "st", "rech"]).sort_index()
 #rdf.head(12)
 
+# Display the DataFrame
+st.write(rdf)
+
 # Add a download button to download the CSV file
 csv = rdf.to_csv(index=True)
 b64 = base64.b64encode(csv.encode()).decode() # encode as CSV string
 href = f'<a href="data:file/csv;base64,{b64}" download="water_recharge_data.csv">Download Water Recharge Data</a>'
 st.markdown(href, unsafe_allow_html=True)
+
+
 
 # Data visualization in the form of barplots.
 fig, ax = plt.subplots(figsize=(15, 6))
