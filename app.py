@@ -34,7 +34,7 @@ st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 st.title("Explore Soil Characteristics and Hydrological Properties of a Region")
 
 # Add subtitle to page
-st.subheader("Discover Soil Content, Water Content, Potential Evapotranspiration, Recharge, Perched Water Level, Precipitation, and Soil Moisture! Enter longitude, latitude, initial date, and final date.")
+st.write("Discover Soil Content, Water Content, Potential Evapotranspiration, Water Recharge, Perched Water Level, Precipitation, and Soil Moisture! Enter longitude, latitude, initial date, and final date.")
 
 
 
@@ -200,6 +200,9 @@ my_map.add_child(folium.LayerControl())
 
 # Add a layer control panel to the map.
 my_map.addLayerControl()
+
+#Header for map
+st.subheader("Soil Content Layer")
 
 # Display the map.
 my_map.to_streamlit(height=600,  responsive=True, scrolling=False)
