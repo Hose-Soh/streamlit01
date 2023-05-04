@@ -491,9 +491,9 @@ def ee_array_to_df(arr, list_of_bands):
 
     # Convert the time field into a datetime.
     df["datetime"] = pd.to_datetime(df["time"], unit="ms")
-    df["Datetime"] = df["datetime"]
+
     # Keep the columns of interest.
-    df = df[["Datetime", "time", "datetime", *list_of_bands]]
+    df = df[["time", "datetime", *list_of_bands]]
 
     # The datetime column is defined as index.
     df = df.set_index("datetime")
