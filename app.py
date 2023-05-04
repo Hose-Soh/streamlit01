@@ -826,7 +826,13 @@ rech_coll = ee.ImageCollection(rech_list)
 
 arr = rech_coll.getRegion(poi, scale).getInfo()
 rdf = ee_array_to_df(arr, ["pr", "pet", "apwl", "st", "rech"]).sort_index()
-rdf.head(12)
+#rdf.head(12)
+
+# Add a download button to download the CSV file
+csv = rdf.to_csv(index=True)
+b64 = base64.b64encode(csv.encode()).decode() # encode as CSV string
+href = f'<a href="data:file/csv;base64,{b64}" download="water_recharge_data.csv">Download Water Recharge Data</a>'
+st.markdown(href, unsafe_allow_html=True)
 
 # Data visualization in the form of barplots.
 fig, ax = plt.subplots(figsize=(15, 6))
