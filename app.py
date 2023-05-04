@@ -446,8 +446,8 @@ pr = (
 pet = (
     ee.ImageCollection("MODIS/006/MOD16A2")
     .select(["PET", "ET_QC"])
-    .filterDate(i_date, f_date)
-)
+    .filterDate(i_date.format('YYYY-MM-dd'), f_date.format('YYYY-MM-dd'))
+    )
 
 # Evaluate local precipitation conditions.
 local_pr = pr.getRegion(geometry=poi,
@@ -455,7 +455,7 @@ local_pr = pr.getRegion(geometry=poi,
 ##pprint.pprint(local_pr[:5])
 
 # Convert local_pr to a Pandas DataFrame
-pr_df = pd.DataFrame(local_pr[1:][:], columns=local_pr[0][:])
+pr_df = pd.DataFrame(local_pr[1:], columns=local_pr[0])
 
 # Convert the 'time' column to a datetime object
 pr_df['time'] = pd.to_datetime(pr_df['time'], unit='ms')
