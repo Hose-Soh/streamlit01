@@ -31,7 +31,7 @@ logo_nitrolytics = "nitrolytics.png"
 st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 
 # Add title to page
-st.title("Exploring Soil Characteristics and Hydrological Properties of a Region: Soil Content, Potential Evapotranspiration, Recharge, Perched Water Level, Precipitation, and Soil Moisture")
+st.title("Explore Soil Characteristics and Hydrological Properties of a Region")
 
 # Add subtitle to page
 st.subheader("Discover Soil Content, Water Content, Potential Evapotranspiration, Recharge, Perched Water Level, Precipitation, and Soil Moisture! Enter longitude, latitude, initial date, and final date.")
