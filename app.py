@@ -625,7 +625,13 @@ meteo_arr = meteo.getRegion(poi, scale).getInfo()
 # Transform the array into a pandas dataframe and sort the index.
 meteo_df = ee_array_to_df(meteo_arr, ["pr", "pet"]).sort_index()
 
+#Adding subheader and description for mateorological data
+st.subheader("Precipitation and Potential Evapotranspiration Data for Region of Interest")
 
+st.write("This section displays a dataframe of precipitation and potential evapotranspiration data for a selected region of interest within a given time frame. The data is presented in columns, with each column representing a specific variable related to the water cycle.")
+# Add a description of the columns
+st.write("\"PR\" represents Precipitation, which refers to the amount of water that falls to the ground in the form of rain, snow, sleet, or hail.")
+st.write("\"PET\" represents Potential Evapotranspiration, which is the amount of water that would evaporate and transpire from an area if it had an unlimited supply of water. It is a measure of the atmospheric demand for water.")
 # Display the DataFrame
 st.write(meteo_df)
 
@@ -661,6 +667,8 @@ ax.set_xlabel(None)
 # Define the date format and shape of x-labels.
 x_labels = meteo_df.index.strftime("%m-%Y")
 ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
+
+st.write("The visualization displays the trends of both precipitation and potential evapotranspiration over time, allowing users to analyze how these variables have changed in the selected region.")
 
 st.pyplot(fig)
 
@@ -852,6 +860,18 @@ arr = rech_coll.getRegion(poi, scale).getInfo()
 rdf = ee_array_to_df(arr, ["pr", "pet", "apwl", "st", "rech"]).sort_index()
 #rdf.head(12)
 
+# subheader
+st.subheader("Comparison of Precipitation, Potential Evapotranspiration, and Recharge")
+
+# description
+st.write("This section provides a comparison of precipitation, potential evapotranspiration, and recharge for the selected region of interest. The data is presented in both a dataframe. Here are the meanings of the column names in the dataframe:")
+st.write("- PR: Precipitation is the amount of water that falls to the ground in the form of rain, snow, sleet, or hail.")
+st.write("- PET: Potential Evapotranspiration is the amount of water that would evaporate and transpire from an area if it had an unlimited supply of water. It is a measure of the atmospheric demand for water.")
+st.write("- Rech: Recharge is the process by which water enters an aquifer, typically through infiltration of precipitation or other surface water sources.")
+st.write("- ST: Soil moisture is the amount of water held in the soil that is available for plant uptake and other uses. It can be an important factor in recharge, as it affects the amount of water that can infiltrate into the groundwater system.")
+st.write("- APWL: Average Perched Water Level is the average height of the water table or perched water body in an aquifer.")
+
+
 # Display the DataFrame
 st.write(rdf)
 
@@ -890,6 +910,8 @@ ax.set_xlabel(None)
 # Define the date format and shape of x-labels.
 x_labels = rdf.index.strftime("%m-%Y")
 ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
+
+st.write("The visualization shows a comparison of precipitation, potential evapotranspiration, and recharge over time.This visualization allows you to easily compare the trends of each variable and identify any patterns or anomalies that may be present. By understanding the relationships between precipitation, potential evapotranspiration, and recharge, it's easier to gain insight into the water balance of the region and its overall water availability.")
 
 st.pyplot(fig)
 
