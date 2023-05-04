@@ -635,7 +635,7 @@ ax.set_ylabel("Intensity [mm]")
 ax.set_xlabel(None)
 
 # Define the date format and shape of x-labels.
-x_labels = meteo_df.index.strftime("%m-%Y")
+x_labels = meteo_df.index.strftime("%m-%Y-%d")
 ax.set_xticklabels(x_labels, rotation=90, fontsize=10)
 
 st.pyplot(fig)
