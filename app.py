@@ -86,13 +86,13 @@ with form:
     default_f_date = datetime(2020, 1, 1)
 
     # Create date inputs with default values
-    i_date = st.date_input("Initial date of interest (inclusive)", value=default_i_date, min_value=datetime(1992, 1, 1), max_value=datetime.now())
-    f_date = st.date_input("Final date of interest (exclusive)", value=default_f_date, min_value=datetime(1992, 1, 1), max_value=datetime.now())
+    i_date = st.date_input("Initial Date of Interest (Inclusive)", value=default_i_date, min_value=datetime(1992, 1, 1), max_value=datetime.now())
+    f_date = st.date_input("Final Date of Interest (Exclusive)", value=default_f_date, min_value=datetime(1992, 1, 1), max_value=datetime.now())
 
 
     # Take input from user for lon and lat
-    lon = st.number_input("Enter the longitude", value=5.145041)
-    lat = st.number_input("Enter the latitude", value=45.772439)
+    lon = st.number_input("Enter The Longitude", value=5.145041)
+    lat = st.number_input("Enter The Latitude", value=45.772439)
     poi = ee.Geometry.Point(lon, lat)
 
     # A nominal scale in meters of the projection to work in [in meters].
@@ -100,7 +100,7 @@ with form:
     
 
     # button to update visualization
-    update_depth = st.form_submit_button('Update')
+    update_depth = st.form_submit_button('Show Result')
 
 
 
