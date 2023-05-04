@@ -450,8 +450,7 @@ pet = (
     )
 
 # Evaluate local precipitation conditions.
-local_pr = pr.getRegion(geometry=poi,
-  scale=scale).getInfo()
+local_pr = pr.getRegion(geometry=poi, scale=scale)
 ##pprint.pprint(local_pr[:5])
 
 # Convert local_pr to a Pandas DataFrame
