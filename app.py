@@ -30,7 +30,7 @@ ee.Initialize(credentials)
 logo_omdena = "omdena.png"
 logo_nitrolytics = "nitrolytics.png"
 
-st.set_page_config(page_title="Soil Data Exploration", layout="wide", page_icon=logo_omdena)
+st.set_page_config(page_title="Soil Data Exploration", page_icon=logo_omdena)
 
 
 # shape the map
