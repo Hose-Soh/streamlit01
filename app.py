@@ -863,13 +863,13 @@ rdf = ee_array_to_df(arr, ["pr", "pet", "apwl", "st", "rech"]).sort_index()
 # subheader
 st.subheader("Comparison of Precipitation, Potential Evapotranspiration, and Recharge")
 
-# description
-st.write("This section provides a comparison of precipitation, potential evapotranspiration, and recharge for the selected region of interest. The data is presented in both a dataframe. Here are the meanings of the column names in the dataframe:")
-st.write("- PR: Precipitation is the amount of water that falls to the ground in the form of rain, snow, sleet, or hail.")
-st.write("- PET: Potential Evapotranspiration is the amount of water that would evaporate and transpire from an area if it had an unlimited supply of water. It is a measure of the atmospheric demand for water.")
-st.write("- Rech: Recharge is the process by which water enters an aquifer, typically through infiltration of precipitation or other surface water sources.")
-st.write("- ST: Soil moisture is the amount of water held in the soil that is available for plant uptake and other uses. It can be an important factor in recharge, as it affects the amount of water that can infiltrate into the groundwater system.")
-st.write("- APWL: Average Perched Water Level is the average height of the water table or perched water body in an aquifer.")
+# # description
+# st.write("This section provides a comparison of precipitation, potential evapotranspiration, and recharge for the selected region of interest. The data is presented in a dataframe.")
+# st.write("- PR: Precipitation is the amount of water that falls to the ground in the form of rain, snow, sleet, or hail.")
+# st.write("- PET: Potential Evapotranspiration is the amount of water that would evaporate and transpire from an area if it had an unlimited supply of water. It is a measure of the atmospheric demand for water.")
+# st.write("- Rech: Recharge is the process by which water enters an aquifer, typically through infiltration of precipitation or other surface water sources.")
+# st.write("- ST: Soil moisture is the amount of water held in the soil that is available for plant uptake and other uses. It can be an important factor in recharge, as it affects the amount of water that can infiltrate into the groundwater system.")
+# st.write("- APWL: Average Perched Water Level is the average height of the water table or perched water body in an aquifer.")
 
 
 # Display the DataFrame
