@@ -1,6 +1,7 @@
 import ee
 import logging
 import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -52,3 +53,25 @@ def get_local_soil_profile_at_poi(dataset, poi, buffer, olm_bands):
     profile = {key: round(val, 3) for key, val in profile.items()}
 
     return profile
+
+
+
+def get_local_soil_profile_at_roi(dataset, roi, buffer, olm_bands, max_points = 5000):
+    # Get properties at the location of interest and transfer to client-side.
+    prop = dataset.sample(roi, buffer, numPixels=max_points).select(olm_bands).getInfo()
+
+    # Selection of the features/properties of interest.
+    profile = {key: [] for key in olm_bands}
+    for idx in range(len(prop["features"])):
+        for key, val in prop["features"][idx]["properties"].items():
+            profile[key].append(round(val, 3))
+
+    return profile
+
+
+def get_band_mean_for_roi(roi_profile):
+    logger.info(roi_profile.keys())
+    mean_vals = {key: np.mean(values) for key, values in roi_profile.items()}
+    return mean_vals
+    
+

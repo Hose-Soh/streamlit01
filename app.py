@@ -78,6 +78,7 @@ import branca.colormap as cm
 
 # __________________________Input Parameters________________________
 
+roi = ee.Geometry.Polygon([[-105.35, 39.95], [-105.35, 40.05],[-105.2, 40.05], [-105.2, 39.95], [-105.2, 39.95]])
 
 # Show the code in the sidebar
 with st.sidebar:
@@ -126,6 +127,8 @@ with form:
     update_depth = st.form_submit_button("Show Result")
 
 
+
+
 # _______________________________________________________Determination of Soil Texture and Properties____________________________________________
 
 
@@ -163,7 +166,6 @@ vis_params = {
 my_map.addLayer(sand, vis_params, "Sand Content")
 
 # Add a marker at the location of interest.
-# Add a marker at the location of interest.
 folium.Marker([lat, lon], popup="point of interest").add_to(my_map)
 # Add a layer control panel to the map.
 my_map.add_child(folium.LayerControl())
@@ -191,6 +193,21 @@ profile_orgc = soil_properties.get_local_soil_profile_at_poi(
 )
 
 
+# Obtain the Soil Profiles at the roi
+profile_sand_roi = soil_properties.get_local_soil_profile_at_roi(
+    sand, roi, scale, olm_bands
+)
+profile_clay_roi = soil_properties.get_local_soil_profile_at_roi(
+    clay, roi, scale, olm_bands
+)
+profile_orgc_roi = soil_properties.get_local_soil_profile_at_roi(
+    orgc, roi, scale, olm_bands
+)
+
+profile_sand_roi_mean = soil_properties.get_band_mean_for_roi(profile_sand_roi)
+profile_clay_roi_mean = soil_properties.get_band_mean_for_roi(profile_clay_roi)
+profile_orgc_roi_mean = soil_properties.get_band_mean_for_roi(profile_orgc_roi)
+
 # ___________________________________________________Comparison of Soil Content Layers at Different Depths_____________________________________________________________
 # Subheader and description for soil content visualization
 st.subheader("Comparison of Soil Content Layers at Different Depths")
@@ -201,7 +218,25 @@ st.write(
 
 # Display the plot using Streamlit.
 st.pyplot(
-    ui_visuals.generate(profile_sand, profile_clay, profile_orgc, olm_bands, olm_depths)
+    ui_visuals.generate_soil_composition_barchart(profile_sand, profile_clay, profile_orgc, olm_bands, olm_depths, "Properties of the soil at different depths (mass content)")
+)
+
+st.pyplot(
+    ui_visuals.generate_soil_composition_barchart(profile_sand_roi_mean, profile_clay_roi_mean, profile_orgc_roi_mean, olm_bands, olm_depths, "Mean Soil Composition across ROI at Depths")
+)
+
+
+# Plot boxplot showing the range of compositions across the ROI
+st.pyplot(
+    ui_visuals.generate_soil_properties_boxplot(profile_sand_roi, "Range of Sand composition across ROI")
+)
+
+st.pyplot(
+    ui_visuals.generate_soil_properties_boxplot(profile_clay_roi, "Range of Clay Composition across ROI")
+)
+
+st.pyplot(
+    ui_visuals.generate_soil_properties_boxplot(profile_orgc_roi, "Range of Organic Carbon Composition across ROI")
 )
 
 # ___________________________________________________Hydraulic Properties of Soil at Different Depths_____________________________________________________________

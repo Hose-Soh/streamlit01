@@ -146,7 +146,22 @@ def generate_hydraulic_props_chart(profile_wp, profile_fc, olm_bands, olm_depths
 
     return fig
 
-def generate(profile_sand, profile_clay, profile_orgc, olm_bands, olm_depths):
+def generate_soil_properties_boxplot(dataset, plot_title):
+    
+    fig, ax = plt.subplots(figsize=(15, 6))
+    ax.set_title(plot_title)
+    ax.set_xlabel("Bands")
+    ax.set_ylabel("Percentage")
+
+    labels, data = [*zip(*dataset.items())]
+    ax.boxplot(data)
+    ax.set_xticks(range(1, len(labels) + 1), labels)
+    ax.set_yticks(np.arange(0.0, 1.0, 0.1))
+
+    return fig
+
+
+def generate_soil_composition_barchart(profile_sand, profile_clay, profile_orgc, olm_bands, olm_depths, plot_title):
     # Data visualization in the form of a bar plot.
     # Create the plot
     fig, ax = plt.subplots(figsize=(15, 6))
@@ -186,14 +201,13 @@ def generate(profile_sand, profile_clay, profile_orgc, olm_bands, olm_depths):
         alpha=0.75,
     )
 
-
     # Application of the function to each barplot.
     autolabel_soil_prop(ax, rect1)
     autolabel_soil_prop(ax, rect2)
     autolabel_soil_prop(ax, rect3)
 
     # Title of the plot.
-    ax.set_title("Properties of the soil at different depths (mass content)", fontsize=14)
+    ax.set_title(plot_title, fontsize=14)
 
     # Properties of x/y labels and ticks.
     ax.set_xticks(x)
