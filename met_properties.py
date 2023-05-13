@@ -18,17 +18,17 @@ def get_potential_evaporation_for_dates(start_date, end_date):
         .filterDate(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
         )
 
-def get_meteorological_for_poi(poi, scale, start_date, end_date):
+def get_meteorological_for_poi(roi, scale, start_date, end_date):
     pr = get_precipitation_data_for_dates(start_date, end_date)
     pet = get_potential_evaporation_for_dates(start_date, end_date)
 
-    local_pr = pr.getRegion(poi, scale).getInfo()
+    local_pr = pr.getRegion(roi, scale).getInfo()
 
     pr_df = ee_utils.ee_array_to_df(local_pr, ["precipitation"])
 
 
     # Evaluate local potential evapotranspiration.
-    local_pet = pet.getRegion(poi, scale).getInfo()
+    local_pet = pet.getRegion(roi, scale).getInfo()
 
     # Transform the result into a pandas dataframe.
     pet_df = ee_utils.ee_array_to_df(local_pet, ["PET", "ET_QC"])

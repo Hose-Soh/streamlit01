@@ -1,6 +1,7 @@
 import ee
 import logging
 import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -41,14 +42,52 @@ def get_soil_prop(soil_type):
 
     return dataset
 
-def get_local_soil_profile_at_poi(dataset, poi, buffer, olm_bands):
+def get_local_soil_profile_at_poi(dataset, roi, buffer, olm_bands, file_name):
+    # # Soil depths [in cm] where we have data.
+    # olm_depths = [0, 10, 30, 60, 100, 200]
+
+    # # Names of bands associated with reference depths.
+    # olm_bands = ["b" + str(sd) for sd in olm_depths]
     # Get properties at the location of interest and transfer to client-side.
-    prop = dataset.sample(poi, buffer).select(olm_bands).getInfo()
+    prop = dataset.sample(roi, buffer).select(olm_bands).getInfo()
+    #print(prop)
+    
+    # Initialize an empty list to store dictionaries for each ID
+    data_dicts = []
 
+    # Iterate over each feature and extract 'id' and 'properties'
+    for feature in prop['features']:
+        id_value = feature['id']
+        properties = feature['properties']
+    
+        # Create a dictionary for each ID
+        data_dict = {'id': id_value}
+        data_dict.update(properties)
+    
+        # Append the dictionary to the list
+        data_dicts.append(data_dict)
+
+    # Create the DataFrame from the list of dictionaries
+    df = pd.DataFrame(data_dicts)
+
+    # Reorder the columns
+    column_order = ['id', 'b0', 'b10', 'b30', 'b60', 'b100', 'b200']
+    df = df[column_order]
+
+    #print(df)
+    df.to_csv(file_name, index=False)
+    
+    # Calculate the average of 'b0', 'b10', 'b30', 'b60', 'b100', 'b200'
+    averages = df[['b0', 'b10', 'b30', 'b60', 'b100', 'b200']].mean()
+
+    # Create a dictionary with 'b0', 'b10', 'b30', 'b60', 'b100', 'b200' as keys and their average as values
+    average_dict = averages.to_dict()
+    #print(average_dict)
+    
     # Selection of the features/properties of interest.
-    profile = prop["features"][0]["properties"]
-
+    #profile = prop["features"][0]["properties"]
+    #print("profile", profile)
     # Re-shaping of the dict.
-    profile = {key: round(val, 3) for key, val in profile.items()}
-
+    profile = {key: round(val, 3) for key, val in average_dict.items()}
+    #print("profile", profile)
     return profile

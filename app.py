@@ -12,7 +12,7 @@ import streamlit as st
 import base64
 import logging
 import ui_visuals
-
+import ast
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +94,27 @@ st.sidebar.info("### ***Welcome***\n###### ***Soil Data*** ")
 
 form = st.sidebar.form("Input Data")
 
+def convert_to_point(coordinates):
+    '''
+    This function return a list as a ee.geometry.Point object
+    '''
+    return ee.Geometry.Point(coordinates)
+
+def convert_to_polygon(coordinates):
+    '''
+    This function return a list of lists as a ee.geometry.Polygon object
+    '''
+    return ee.Geometry.Polygon(coordinates)
+
+
+
+# Create a GEE map centered on the location of interest
+my_map = geemap.Map(
+    zoom=3,
+    Draw_export=True,
+)
+
+
 with form:
     # Define the date range slider
     # Set default dates
@@ -113,11 +134,30 @@ with form:
         min_value=datetime(1992, 1, 1),
         max_value=datetime.now(),
     )
-
-    # Take input from user for lon and lat
-    lon = st.number_input("Enter The Longitude", value=5.145041)
-    lat = st.number_input("Enter The Latitude", value=45.772439)
-    poi = ee.Geometry.Point(lon, lat)
+    
+    #Taking geometry point input from user
+    list_input = st.text_input("Enter the list:")
+    try:
+        global parsed_list
+        #default value for parsed_list
+        parsed_list = [[-268.235321,22.435148],[-268.235321,22.480837],[-268.17627,22.480837],[-268.17627,22.435148],[-268.235321,22.435148]]
+        parsed_list = ast.literal_eval(list_input)
+        
+        if isinstance(parsed_list, list):
+            if len(parsed_list) == 1:
+                coords_user = convert_to_point(parsed_list[0])
+                global roi
+                roi = coords_user
+            elif len(parsed_list) > 1:
+                
+                coords_user = convert_to_polygon(parsed_list)
+                roi = coords_user
+            else:
+                st.write("Invalid input. Please enter a non-empty list.")
+        else:
+            st.write("Invalid input. Please enter a valid list.")
+    except Exception as e:
+        st.write("Error:", e)
 
     # A nominal scale in meters of the projection to work in [in meters].
     scale = 1000
@@ -125,6 +165,69 @@ with form:
     # button to update visualization
     update_depth = st.form_submit_button("Show Result")
 
+
+#_____________________________This code blocks are written to retrive coordinates from ROI drawn by user on the map.___________ 
+# But it does not work in streamlit_____________________________________________________
+
+# # Get the drawn features from the map
+# drawn_features = my_map.draw_features
+# # Get the last drawn feature from the map
+# last_feature = my_map.draw_last_feature
+
+
+# #Check if anything was drawn on the map
+# if last_feature is not None:
+    
+#     geometry = last_feature.geometry()
+    
+#     # Extract the coordinates based on the geometry type
+#     if geometry.type().getInfo() == 'Polygon':
+#         # For polygons, extract the exterior coordinates
+#         coords = geometry.coordinates().get(0).getInfo()
+#         for coord in coords:
+#             print(coord)
+#     elif geometry.type().getInfo() == 'LineString':
+#         # For lines, extract the coordinates
+#         coords = geometry.coordinates().getInfo()
+#         for coord in coords:
+#             print(coord)
+#     elif geometry.type().getInfo() == 'Point':
+#         # For points, extract the coordinates
+#         coords = geometry.coordinates().getInfo()
+#         print(coords)
+#     else:
+#         print("Unsupported geometry type.")
+    
+#     #Checking if coords variable is polygon or point. If polygon make a unique list
+#     if isinstance(coords, list) and all(isinstance(coord, list) for coord in coords):
+#         # Create a set to store unique coordinates
+#         unique_coords = set()
+
+#         # Iterate over the coordinates and add them to the set
+#         for coord in coords:
+#             unique_coords.add(tuple(coord))
+
+#         # Convert the set back to a list of lists
+#         roi_coords = [list(coord) for coord in unique_coords]
+#         print(roi_coords)
+#         # Take input from user for lon and lat
+#         roi = ee.Geometry.Polygon(roi_coords)
+#         print(type(roi))
+#     else:
+#         roi_coords = coords
+#         print(roi_coords)
+#         roi = ee.Geometry.Point(roi_coords)
+        
+
+
+# #Add a layer of the selected region on the map
+# polygonBounds = roi.bounds()
+# # Display the polygon bounds on the map
+# bounds_style = {'color': 'red'}
+# bounds_layer = geemap.ee_tile_layer(polygonBounds, bounds_style, 'Region of Interest')
+# my_map.addLayer(bounds_layer)
+# # Display the map
+# my_map.addLayerControl()
 
 # _______________________________________________________Determination of Soil Texture and Properties____________________________________________
 
@@ -145,13 +248,6 @@ orgc = soil_properties.get_soil_prop("orgc")
 # ph = dataset.select("PHIHOX").first()
 
 
-# Create a GEE map centered on the location of interest
-my_map = geemap.Map(
-    center=[lat, lon],
-    zoom=3,
-    Draw_export=True,
-)
-
 # Set visualization parameters.
 vis_params = {
     "min": 0.01,
@@ -164,7 +260,28 @@ my_map.addLayer(sand, vis_params, "Sand Content")
 
 # Add a marker at the location of interest.
 # Add a marker at the location of interest.
-folium.Marker([lat, lon], popup="point of interest").add_to(my_map)
+#folium.Marker(parsed_list, popup="point of interest").add_to(my_map)
+# Create a polygon and add it to the map
+
+# Create a polygon and add it to the map
+polygon = folium.Polygon(locations=parsed_list, popup="Area of interest")
+polygon.add_to(my_map)
+
+# # Create a feature group and add the polygon to it
+# feature_group = folium.FeatureGroup(name='My Layer')
+# feature_group.add_child(polygon)
+
+# Add the feature group to the map
+my_map.add_child(polygon)
+
+# Add layer control to the map
+#folium.LayerControl().add_to(my_map)
+
+# Header for map
+st.subheader("Google Earth Map")
+# Display the map.
+my_map.to_streamlit(height=600, responsive=True, scrolling=False)
+
 # Add a layer control panel to the map.
 my_map.add_child(folium.LayerControl())
 
@@ -173,21 +290,17 @@ my_map.add_child(folium.LayerControl())
 my_map.addLayerControl()
 
 
-# Header for map
-st.subheader("Google Earth Map")
 
-# Display the map.
-my_map.to_streamlit(height=600, responsive=True, scrolling=False)
 
 # Obtain the Soil Profiles at the point
 profile_sand = soil_properties.get_local_soil_profile_at_poi(
-    sand, poi, scale, olm_bands
+    sand, roi, scale, olm_bands, "Sand Data.csv"
 )
 profile_clay = soil_properties.get_local_soil_profile_at_poi(
-    clay, poi, scale, olm_bands
+    clay, roi, scale, olm_bands, "Clay Data.csv"
 )
 profile_orgc = soil_properties.get_local_soil_profile_at_poi(
-    orgc, poi, scale, olm_bands
+    orgc, roi, scale, olm_bands, "Organic Carbon Data.csv"
 )
 
 
@@ -211,7 +324,7 @@ orgm = soil_properties.convert_orgc_to_orgm(orgc)
 
 # Organic matter content profile.
 profile_orgm = soil_properties.get_local_soil_profile_at_poi(
-    orgm, poi, scale, olm_bands
+    orgm, roi, scale, olm_bands, "Organic Matter Content.csv"
 )
 
 # Obtain Field Capacity and Wilting Points
@@ -220,10 +333,10 @@ field_capacity, wilting_point = hydro_properties.compute_hyrdo_properties(
 )
 
 profile_wp = soil_properties.get_local_soil_profile_at_poi(
-    wilting_point, poi, scale, olm_bands
+    wilting_point, roi, scale, olm_bands, "Wilting Point.csv"
 )
 profile_fc = soil_properties.get_local_soil_profile_at_poi(
-    field_capacity, poi, scale, olm_bands
+    field_capacity, roi, scale, olm_bands, "Field capacity.csv"
 )
 
 
@@ -242,8 +355,8 @@ st.pyplot(
 
 
 # _____________________________________________Getting Meteorological Datasets_____________________________________________
-meteo = met_properties.get_meteorological_for_poi(poi, scale, i_date, f_date)
-meteo_df = met_properties.get_meteorological_df_for_poi(meteo, poi, scale)
+meteo = met_properties.get_meteorological_for_poi(roi, scale, i_date, f_date)
+meteo_df = met_properties.get_meteorological_df_for_poi(meteo, roi, scale)
 
 # _____________________________________________Display Meteorological Dataset_____________________________________________
 # Adding subheader and description for mateorological data
@@ -294,7 +407,7 @@ stfc = recharge_properties.calculate_stored_water_at_fc(taw, p)
 # Define the initial time (time0) according to the start of the collection.
 time0 = meteo_df.iloc[0]["time"]
 
-recharge_df = recharge_properties.get_recharge_at_poi_df(meteo, poi, scale, stfc, fcm, wpm, time0)
+recharge_df = recharge_properties.get_recharge_at_poi_df(meteo, roi, scale, stfc, fcm, wpm, time0)
 
 
 # subheader
